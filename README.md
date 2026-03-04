@@ -1,1221 +1,1355 @@
-# NumWiz — Matrix Module
+# NumWiz
 
-A fully-featured, immutable matrix library for JavaScript providing both a **static functional API** (plain arrays in, plain arrays out) and a **chainable instance API** (fluent builder pattern).
+> The ultimate number utility library for JavaScript & TypeScript — arithmetic, formatting, currency, number-to-words in 10 languages, statistics, financial math, matrix algebra, and much more.
+
+[![npm version](https://img.shields.io/npm/v/numwiz)](https://www.npmjs.com/package/numwiz)
+[![license](https://img.shields.io/npm/l/numwiz)](./LICENSE)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue)](https://www.typescriptlang.org/)
 
 ---
 
 ## Table of Contents
 
-1. [Import](#import)
-2. [Architecture](#architecture)
-3. [Error Types](#error-types)
-4. [Static API](#static-api)
-   - [Creation](#creation)
-   - [Inspection](#inspection)
+1. [Installation](#installation)
+2. [Quick Start](#quick-start)
+3. [Architecture](#architecture)
+4. [Chainable API — `numwiz()`](#chainable-api--numwiz)
+   - [Arithmetic Methods](#arithmetic-methods)
+   - [Configuration](#configuration)
+   - [Output Methods](#output-methods)
+   - [Safe Mode](#safe-mode)
+5. [Static Modules](#static-modules)
    - [Arithmetic](#arithmetic)
-   - [Transformations](#transformations)
-   - [Scalar Properties & Reduction](#scalar-properties--reduction)
-   - [Row & Column Operations](#row--column-operations)
-   - [Decomposition](#decomposition)
-   - [Solving Ax = b](#solving-ax--b)
-   - [Structure — Slice, Concat, Reshape](#structure--slice-concat-reshape)
-   - [Boolean Checks](#boolean-checks)
-   - [Vector Operations](#vector-operations)
-   - [Aggregation by Row / Column](#aggregation-by-row--column)
-   - [Functional / Element-wise](#functional--element-wise)
-   - [Display & Utility](#display--utility)
-5. [Instance (Chainable) API](#instance-chainable-api)
-6. [Quick Reference Table](#quick-reference-table)
+   - [Formatting](#formatting)
+   - [Validation](#validation)
+   - [Comparison](#comparison)
+   - [Conversion](#conversion)
+   - [Bitwise](#bitwise)
+   - [Trigonometry](#trigonometry)
+   - [Statistics](#statistics)
+   - [Financial](#financial)
+   - [Advanced](#advanced)
+   - [Sequences](#sequences)
+   - [Random](#random)
+   - [Range](#range)
+   - [Currency](#currency)
+   - [NumberWords](#numberwords)
+   - [Matrix](#matrix)
+6. [Subpath Imports](#subpath-imports)
+7. [Supported Locales](#supported-locales)
+8. [TypeScript Support](#typescript-support)
+9. [Error Reference](#error-reference)
 
 ---
 
-## Import
+## Installation
 
-```js
-const Matrix = require('./src/matrix');
+```bash
+npm install numwiz
+```
+
+---
+
+## Quick Start
+
+```ts
+import numwiz, { Arithmetic, Formatting, Statistics, Matrix } from "numwiz";
+
+// Chainable API
+numwiz(1234567).toCommas(); // "1,234,567"
+numwiz(1000000).locale("hi").toWords(); // "दस लाख"
+numwiz(50).add(50).multiply(2).abbreviate(); // "200"
+
+// Static modules
+Arithmetic.add(1, 2, 3, 4); // 10
+Formatting.toWords(1000000, "en", "indian"); // "ten lakh"
+Statistics.mean([1, 2, 3, 4, 5]); // 3
+Matrix.determinant([
+  [1, 2],
+  [3, 4],
+]); // -2
 ```
 
 ---
 
 ## Architecture
 
-The module exposes two parallel APIs on the same class:
+NumWiz exposes two parallel patterns:
 
-| API | Input | Output | Use case |
-|-----|-------|--------|----------|
-| **Static** | `number[][]` plain arrays | `number[][]` plain arrays | One-off computations, interop with other code |
-| **Instance** | `new Matrix(data)` | `Matrix` instance | Fluent chains — call `.toArray()` at the end to get data |
+| Pattern                   | How to use                       | Best for                                     |
+| ------------------------- | -------------------------------- | -------------------------------------------- |
+| **Chainable** `numwiz(n)` | `numwiz(100).add(50).toCommas()` | Fluent transformations on a single number    |
+| **Static modules**        | `Arithmetic.add(1, 2, 3)`        | Direct one-off calls, tree-shakeable imports |
 
-```js
-// Static — pass arrays, get arrays
-const inv = Matrix.inverse([[4,7],[2,6]]);
+All static methods are **pure** and **non-mutating** — inputs are never modified.
 
-// Instance — chain operations
-const result = new Matrix([[4,7],[2,6]])
-  .inverse()
-  .multiply([[1,0],[0,1]])
-  .round(4)
-  .toArray();
+---
+
+## Chainable API — `numwiz()`
+
+### Import
+
+```ts
+import numwiz from "numwiz";
+// CommonJS
+const { numwiz } = require("numwiz");
 ```
 
-> **Note:** All static methods are **pure** (non-mutating). Input arrays are deep-copied before processing.
+### Basic Example
 
----
+```ts
+const result = numwiz(9876543).add(123457).multiply(2).abbreviate(); // "20M"
 
-## Error Types
+numwiz(1500000).locale("hi").system("indian").toWords(); // "पंद्रह लाख"
 
-| Condition | Error Class |
-|-----------|------------|
-| Non-array / invalid element / NaN / jagged rows | `TypeError` |
-| Wrong dimensions for operation (non-square, size mismatch, out of range index, bad reshape) | `RangeError` |
-| Singular matrix (inverse / solve) | `Error` |
-| Division by zero (scalar / element divide) | `Error` |
-| Linearly dependent columns (QR) | `Error` |
-
----
-
-## Static API
-
-### Creation
-
-All creation methods return `number[][]`.
-
----
-
-#### `Matrix.create(rows, cols, fillValue = 0)`
-
-Creates a matrix filled with a constant value.
-
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `rows` | `number` | Number of rows (positive integer) |
-| `cols` | `number` | Number of columns (positive integer) |
-| `fillValue` | `number` | Value to fill with (default `0`) |
-
-**Returns:** `number[][]`  
-**Throws:** `RangeError` if dimensions are invalid.
-
-```js
-Matrix.create(2, 3);        // [[0,0,0],[0,0,0]]
-Matrix.create(2, 2, 5);     // [[5,5],[5,5]]
+numwiz(99.5).round(0).toCurrency("USD"); // "$100.00"
 ```
 
 ---
 
-#### `Matrix.identity(n)`
+### Arithmetic Methods
 
-Creates an n×n identity matrix.
+All arithmetic methods update the internal value in-chain and return `this`.
 
-```js
-Matrix.identity(3);
-// [[1,0,0],[0,1,0],[0,0,1]]
+| Method              | Description             | Example                                   |
+| ------------------- | ----------------------- | ----------------------------------------- |
+| `.add(n)`           | Add `n`                 | `numwiz(10).add(5).val()` → `15`          |
+| `.subtract(n)`      | Subtract `n`            | `numwiz(10).subtract(3).val()` → `7`      |
+| `.multiply(n)`      | Multiply by `n`         | `numwiz(4).multiply(3).val()` → `12`      |
+| `.divide(n)`        | Divide by `n`           | `numwiz(10).divide(2).val()` → `5`        |
+| `.mod(n)`           | Modulo `n`              | `numwiz(10).mod(3).val()` → `1`           |
+| `.power(n)`         | Raise to power `n`      | `numwiz(2).power(8).val()` → `256`        |
+| `.sqrt()`           | Square root             | `numwiz(9).sqrt().val()` → `3`            |
+| `.cbrt()`           | Cube root               | `numwiz(27).cbrt().val()` → `3`           |
+| `.abs()`            | Absolute value          | `numwiz(-5).abs().val()` → `5`            |
+| `.negate()`         | Negate                  | `numwiz(5).negate().val()` → `-5`         |
+| `.floor()`          | Floor                   | `numwiz(4.9).floor().val()` → `4`         |
+| `.ceil()`           | Ceiling                 | `numwiz(4.1).ceil().val()` → `5`          |
+| `.trunc()`          | Truncate toward zero    | `numwiz(4.9).trunc().val()` → `4`         |
+| `.round(decimals?)` | Round to decimal places | `numwiz(3.14159).round(2).val()` → `3.14` |
+| `.clamp(min, max)`  | Clamp to range          | `numwiz(150).clamp(0, 100).val()` → `100` |
+| `.percent(p)`       | `p`% of value           | `numwiz(200).percent(15).val()` → `30`    |
+
+---
+
+### Configuration
+
+These chainable setters affect how output methods behave. Each returns `this`.
+
+| Method                         | Description                           | Example                             |
+| ------------------------------ | ------------------------------------- | ----------------------------------- |
+| `.locale(code)`                | Set locale for words/ordinals         | `.locale("hi")`, `.locale("fr")`    |
+| `.system("western"\|"indian")` | Number scale for words                | `.system("indian")` uses lakh/crore |
+| `.currency(code)`              | Default currency code                 | `.currency("INR")`                  |
+| `.safe()`                      | Enable safe mode on an existing chain | See [Safe Mode](#safe-mode)         |
+
+---
+
+### Output Methods
+
+These are **terminal** — they return a plain value (not `this`).
+
+#### Raw value
+
+| Method        | Returns   | Description                             |
+| ------------- | --------- | --------------------------------------- |
+| `.val()`      | `number`  | Current numeric value                   |
+| `.result()`   | `number`  | Alias for `val()`                       |
+| `.valueOf()`  | `number`  | Native coercion hook                    |
+| `.toString()` | `string`  | String representation                   |
+| `.isValid()`  | `boolean` | `false` if value is `NaN` or non-finite |
+
+#### Formatting
+
+| Method                   | Returns  | Example                                            |
+| ------------------------ | -------- | -------------------------------------------------- |
+| `.toFixed(d?)`           | `number` | `numwiz(3.14159).toFixed(2)` → `3.14`              |
+| `.toCommas()`            | `string` | `numwiz(1234567).toCommas()` → `"1,234,567"`       |
+| `.toIndianCommas()`      | `string` | `numwiz(1234567).toIndianCommas()` → `"12,34,567"` |
+| `.toRoman()`             | `string` | `numwiz(2026).toRoman()` → `"MMXXVI"`              |
+| `.toFraction(maxDenom?)` | `string` | `numwiz(0.333).toFraction()` → `"1/3"`             |
+| `.toScientific(d?)`      | `string` | `numwiz(12345).toScientific(2)` → `"1.23e+4"`      |
+| `.toEngineering()`       | `string` | `numwiz(12345).toEngineering()` → `"12.345×10^3"`  |
+| `.toPercentage(d?)`      | `string` | `numwiz(75).toPercentage()` → `"75.00%"`           |
+| `.ratioToPercentage(d?)` | `string` | `numwiz(0.75).ratioToPercentage()` → `"75.00%"`    |
+| `.toOrdinal()`           | `string` | `numwiz(3).locale("en").toOrdinal()` → `"3rd"`     |
+| `.abbreviate(d?)`        | `string` | `numwiz(1500000).abbreviate()` → `"1.5M"`          |
+| `.abbreviateIndian(d?)`  | `string` | `numwiz(1500000).abbreviateIndian()` → `"15L"`     |
+
+#### Words
+
+| Method              | Returns  | Notes                                             |
+| ------------------- | -------- | ------------------------------------------------- |
+| `.toWords()`        | `string` | Uses current `.locale()` and `.system()` settings |
+| `.toWordsWestern()` | `string` | Forces western scale (million/billion)            |
+| `.toWordsIndian()`  | `string` | Forces Indian scale (lakh/crore)                  |
+
+```ts
+numwiz(1000000).locale("en").toWords(); // "one million"
+numwiz(1000000).locale("en").toWordsIndian(); // "ten lakh"
+numwiz(1000000).locale("hi").toWordsIndian(); // "दस लाख"
+```
+
+#### Currency
+
+| Method                        | Returns  | Example                                                              |
+| ----------------------------- | -------- | -------------------------------------------------------------------- |
+| `.toCurrency(curr?, loc?)`    | `string` | `numwiz(1999.5).toCurrency("USD")` → `"$1,999.50"`                   |
+| `.toCurrencyIndian(sym?)`     | `string` | `numwiz(1500000).toCurrencyIndian("₹")` → `"₹15,00,000.00"`          |
+| `.toCurrencyWords()`          | `string` | `numwiz(150).toCurrencyWords()` → `"one hundred fifty dollars"`      |
+| `.toCurrencyWordsIndian()`    | `string` | Indian English currency words                                        |
+| `.toCurrencyAbbr(sym?)`       | `string` | `numwiz(1500000).currency("INR").toCurrencyAbbr()` → `"₹1.5M"`       |
+| `.toCurrencyAbbrIndian(sym?)` | `string` | `numwiz(1500000).currency("INR").toCurrencyAbbrIndian()` → `"₹15 L"` |
+
+#### Conversion
+
+| Method        | Returns  | Example                            |
+| ------------- | -------- | ---------------------------------- |
+| `.toBinary()` | `string` | `numwiz(10).toBinary()` → `"1010"` |
+| `.toOctal()`  | `string` | `numwiz(8).toOctal()` → `"10"`     |
+| `.toHex()`    | `string` | `numwiz(255).toHex()` → `"ff"`     |
+| `.toBase(b)`  | `string` | `numwiz(255).toBase(16)` → `"ff"`  |
+
+#### Validation (boolean output)
+
+| Method               | Returns   | Example                                    |
+| -------------------- | --------- | ------------------------------------------ |
+| `.isEven()`          | `boolean` | `numwiz(4).isEven()` → `true`              |
+| `.isOdd()`           | `boolean` | `numwiz(3).isOdd()` → `true`               |
+| `.isPrime()`         | `boolean` | `numwiz(7).isPrime()` → `true`             |
+| `.isPositive()`      | `boolean` | `numwiz(1).isPositive()` → `true`          |
+| `.isNegative()`      | `boolean` | `numwiz(-1).isNegative()` → `true`         |
+| `.isInteger()`       | `boolean` | `numwiz(3.0).isInteger()` → `true`         |
+| `.isPalindrome()`    | `boolean` | `numwiz(121).isPalindrome()` → `true`      |
+| `.isArmstrong()`     | `boolean` | `numwiz(153).isArmstrong()` → `true`       |
+| `.isPerfectNumber()` | `boolean` | `numwiz(6).isPerfectNumber()` → `true`     |
+| `.isPowerOfTwo()`    | `boolean` | `numwiz(64).isPowerOfTwo()` → `true`       |
+| `.isFiniteNum()`     | `boolean` | `numwiz(Infinity).isFiniteNum()` → `false` |
+
+---
+
+### Safe Mode
+
+In safe mode, operations that would throw instead set the value to `NaN`, allowing the chain to continue.
+
+```ts
+// Default (throws)
+numwiz(10).divide(0); // throws Error: Division by zero
+
+// Safe mode via factory
+numwiz.safe(10).divide(0).val(); // NaN
+numwiz.safe(-9).sqrt().val(); // NaN
+numwiz
+  .safe("hello" as any)
+  .add(1)
+  .val(); // NaN
+
+// Check validity
+const n = numwiz.safe(10).divide(0);
+n.isValid(); // false
+n.val(); // NaN
+
+// Enable mid-chain
+numwiz(100).safe().divide(0).val(); // NaN
+
+// Constructor form
+new NumWiz(100, { safe: true });
 ```
 
 ---
 
-#### `Matrix.zeros(rows, cols)` / `Matrix.ones(rows, cols)` / `Matrix.fill(rows, cols, value)`
+## Static Modules
 
-Convenience aliases for `create`.
+All modules are exported by name from the main package:
 
-```js
-Matrix.zeros(2, 3);       // [[0,0,0],[0,0,0]]
-Matrix.ones(2, 2);        // [[1,1],[1,1]]
-Matrix.fill(2, 2, 7);     // [[7,7],[7,7]]
+```ts
+import { Arithmetic, Formatting, Statistics, Financial, Matrix } from "numwiz";
 ```
 
----
-
-#### `Matrix.diagonal(values)`
-
-Creates a square diagonal matrix from an array of values.
-
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `values` | `number[]` | Values placed on the main diagonal |
-
-```js
-Matrix.diagonal([1, 2, 3]);
-// [[1,0,0],[0,2,0],[0,0,3]]
-```
-
----
-
-#### `Matrix.random(rows, cols, min = 0, max = 1, integers = false)`
-
-Creates a matrix of random values in `[min, max)`.
-
-```js
-Matrix.random(2, 3);                    // floats in [0, 1)
-Matrix.random(2, 3, 1, 10, true);       // integers in [1, 10)
-```
-
----
-
-#### `Matrix.fromFlat(flat, rows, cols)`
-
-Reshapes a 1D flat array into a 2D matrix (row-major order).
-
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `flat` | `number[]` | 1D source array |
-| `rows` | `number` | Target row count |
-| `cols` | `number` | Target column count |
-
-**Throws:** `RangeError` if `flat.length !== rows * cols`.
-
-```js
-Matrix.fromFlat([1,2,3,4,5,6], 2, 3);
-// [[1,2,3],[4,5,6]]
-```
-
----
-
-#### `Matrix.fromArray(input, rows?, cols?)`
-
-Accepts two call signatures:
-
-- `fromArray(array2D)` — validates and deep-copies a 2D array
-- `fromArray(flat, rows, cols)` — reshapes a flat array (equivalent to `fromFlat`)
-
-```js
-Matrix.fromArray([[1,2],[3,4]]);          // validates & copies
-Matrix.fromArray([1,2,3,4], 2, 2);       // [[1,2],[3,4]]
-```
-
----
-
-#### `Matrix.toArray(m)`
-
-Returns a **2D deep copy** of `m`. Use `Matrix.flatten(m)` for a 1D result.
-
-```js
-const copy = Matrix.toArray([[1,2],[3,4]]);
-// [[1,2],[3,4]]  — independent copy
-```
-
----
-
-#### `Matrix.columnVector(values)` / `Matrix.rowVector(values)`
-
-```js
-Matrix.columnVector([1, 2, 3]);   // [[1],[2],[3]]  (3×1)
-Matrix.rowVector([1, 2, 3]);      // [[1,2,3]]      (1×3)
-```
-
----
-
-#### `Matrix.rotation2D(angle)`
-
-2×2 counter-clockwise rotation matrix for `angle` in **radians**.
-
-```js
-Matrix.rotation2D(Math.PI / 2);
-// [[0,-1],[1,0]]  (approx)
-```
-
----
-
-#### `Matrix.scaling(...factors)`
-
-Diagonal scaling matrix. Equivalent to `Matrix.diagonal(factors)`.
-
-```js
-Matrix.scaling(2, 3);    // [[2,0],[0,3]]
-```
-
----
-
-#### `Matrix.hilbert(n)`
-
-The n×n [Hilbert matrix](https://en.wikipedia.org/wiki/Hilbert_matrix) — `H[i][j] = 1 / (i + j + 1)`.
-
-```js
-Matrix.hilbert(3);
-// [[1, 0.5, 0.333...], [0.5, 0.333..., 0.25], ...]
-```
-
----
-
-#### `Matrix.vandermonde(values, cols)`
-
-Creates a Vandermonde matrix where row `i` is `[v^0, v^1, ..., v^(cols-1)]`.
-
-```js
-Matrix.vandermonde([1, 2, 3], 4);
-// [[1,1,1,1],[1,2,4,8],[1,3,9,27]]
-```
-
----
-
-#### `Matrix.fromJSON(json)` / `Matrix.toJSON(m)`
-
-JSON serialization round-trip.
-
-```js
-const json = Matrix.toJSON([[1,2],[3,4]]);
-// { rows: 2, cols: 2, data: [[1,2],[3,4]] }
-
-Matrix.fromJSON(json);
-// [[1,2],[3,4]]
-```
-
----
-
-### Inspection
-
----
-
-#### `Matrix.shape(m)` → `[rows, cols]`
-
-```js
-Matrix.shape([[1,2,3],[4,5,6]]);   // [2, 3]
-```
-
----
-
-#### `Matrix.rows(m)` / `Matrix.cols(m)` / `Matrix.size(m)`
-
-```js
-Matrix.rows([[1,2],[3,4]]);    // 2
-Matrix.cols([[1,2],[3,4]]);    // 2
-Matrix.size([[1,2],[3,4]]);    // 4  (total elements)
-```
-
----
-
-#### `Matrix.get(m, row, col)` → `number`
-
-Returns the element at position `[row][col]` (0-based).  
-**Throws:** `RangeError` if index is out of range.
-
-```js
-Matrix.get([[1,2],[3,4]], 1, 0);   // 3
-```
-
----
-
-#### `Matrix.set(m, row, col, value)` → `number[][]`
-
-Returns a **new** matrix with the element at `[row][col]` replaced. Original is unchanged.
-
-```js
-Matrix.set([[1,2],[3,4]], 0, 1, 99);
-// [[1,99],[3,4]]
-```
-
----
-
-#### `Matrix.getRow(m, row)` → `number[]`
-
-```js
-Matrix.getRow([[1,2,3],[4,5,6]], 1);   // [4, 5, 6]
-```
-
----
-
-#### `Matrix.getCol(m, col)` → `number[]`
-
-```js
-Matrix.getCol([[1,2,3],[4,5,6]], 2);   // [3, 6]
-```
-
----
-
-#### `Matrix.getDiagonal(m)` → `number[]`
-
-Returns the main diagonal as a flat array (works for non-square matrices).
-
-```js
-Matrix.getDiagonal([[1,2,3],[4,5,6],[7,8,9]]);   // [1, 5, 9]
-```
-
----
-
-#### `Matrix.clone(m)` → `number[][]`
-
-Deep copy. Equivalent to `Matrix.toArray(m)`.
-
----
-
-#### `Matrix.flatten(m)` → `number[]`
-
-Flattens a 2D matrix to a 1D array in row-major order.
-
-```js
-Matrix.flatten([[1,2],[3,4]]);   // [1, 2, 3, 4]
-```
+Or individually via subpath imports (tree-shakeable — see [Subpath Imports](#subpath-imports)).
 
 ---
 
 ### Arithmetic
 
-All methods return `number[][]` and never mutate their inputs.
+```ts
+import { Arithmetic } from "numwiz";
+```
+
+| Method        | Signature             | Description              | Example                              |
+| ------------- | --------------------- | ------------------------ | ------------------------------------ |
+| `add`         | `(...nums: number[])` | Sum of all arguments     | `Arithmetic.add(1,2,3)` → `6`        |
+| `subtract`    | `(...nums: number[])` | Subtract from first      | `Arithmetic.subtract(10,3,2)` → `5`  |
+| `multiply`    | `(...nums: number[])` | Product                  | `Arithmetic.multiply(2,3,4)` → `24`  |
+| `divide`      | `(a, b)`              | Division (throws on b=0) | `Arithmetic.divide(10,4)` → `2.5`    |
+| `modulus`     | `(a, b)`              | Remainder                | `Arithmetic.modulus(10,3)` → `1`     |
+| `floorDivide` | `(a, b)`              | Integer division         | `Arithmetic.floorDivide(10,3)` → `3` |
+| `power`       | `(base, exp)`         | Exponentiation           | `Arithmetic.power(2,10)` → `1024`    |
+| `sqrt`        | `(n)`                 | Square root              | `Arithmetic.sqrt(16)` → `4`          |
+| `cbrt`        | `(n)`                 | Cube root                | `Arithmetic.cbrt(27)` → `3`          |
+| `nthRoot`     | `(n, root)`           | nth root                 | `Arithmetic.nthRoot(32,5)` → `2`     |
+| `abs`         | `(n)`                 | Absolute value           | `Arithmetic.abs(-7)` → `7`           |
+| `negate`      | `(n)`                 | Negation                 | `Arithmetic.negate(5)` → `-5`        |
+| `reciprocal`  | `(n)`                 | `1/n` (throws on n=0)    | `Arithmetic.reciprocal(4)` → `0.25`  |
+| `log`         | `(n)`                 | Natural log (n > 0)      | `Arithmetic.log(Math.E)` → `1`       |
+| `log2`        | `(n)`                 | Log base 2               | `Arithmetic.log2(8)` → `3`           |
+| `log10`       | `(n)`                 | Log base 10              | `Arithmetic.log10(100)` → `2`        |
+| `exp`         | `(n)`                 | e^n                      | `Arithmetic.exp(1)` → `≈2.718`       |
 
 ---
 
-#### `Matrix.add(a, b)` / `Matrix.subtract(a, b)`
+### Formatting
 
-Element-wise addition / subtraction of two same-size matrices.  
-**Throws:** `RangeError` on size mismatch.
+```ts
+import { Formatting } from "numwiz";
+```
 
-```js
-Matrix.add([[1,2],[3,4]], [[5,6],[7,8]]);
-// [[6,8],[10,12]]
+#### Rounding
+
+| Method         | Signature       | Description          | Example                                        |
+| -------------- | --------------- | -------------------- | ---------------------------------------------- |
+| `toFixed`      | `(num, d?)`     | Fixed decimal places | `Formatting.toFixed(3.14159, 2)` → `3.14`      |
+| `toPrecision`  | `(num, digits)` | Significant figures  | `Formatting.toPrecision(3.14159, 4)` → `3.142` |
+| `round`        | `(num)`         | Standard round       | `Formatting.round(4.6)` → `5`                  |
+| `floor`        | `(num)`         | Floor                | `Formatting.floor(4.9)` → `4`                  |
+| `ceil`         | `(num)`         | Ceiling              | `Formatting.ceil(4.1)` → `5`                   |
+| `trunc`        | `(num)`         | Truncate             | `Formatting.trunc(-4.9)` → `-4`                |
+| `bankersRound` | `(num, d?)`     | Round half to even   | `Formatting.bankersRound(0.5)` → `0`           |
+
+#### Commas
+
+```ts
+Formatting.addCommas(1234567.89); // "1,234,567.89"
+Formatting.addIndianCommas(1234567.89); // "12,34,567.89"
+```
+
+#### Percentage
+
+```ts
+Formatting.toPercentage(75); // "75.00%"       value IS the percentage
+Formatting.ratioToPercentage(0.75); // "75.00%"       value is a 0-1 ratio
+Formatting.fromPercentage("75%"); // 0.75           string → ratio
+Formatting.fromPercentageRaw("75%"); // 75             string → number
+```
+
+#### Number to Words
+
+```ts
+Formatting.toWords(1000000); // "one million"
+Formatting.toWords(1000000, "en", "indian"); // "ten lakh"
+Formatting.toWords(1000000, "hi", "indian"); // "दस लाख"
+Formatting.toWordsIndian(1500000, "en"); // "fifteen lakh"
+Formatting.toWordsWestern(1500000, "en"); // "one million five hundred thousand"
+```
+
+#### Pad
+
+```ts
+Formatting.padStart(5, 4); // "0005"
+Formatting.padStart(5, 4, "*"); // "***5"
+Formatting.padEnd(5, 4); // "5000"
+```
+
+#### Ordinals
+
+```ts
+Formatting.toOrdinal(1); // "1st"
+Formatting.toOrdinal(2); // "2nd"
+Formatting.toOrdinal(3); // "3rd"
+Formatting.toOrdinal(11); // "11th"
+Formatting.toOrdinal(3, "hi"); // "3वाँ"
+```
+
+#### Abbreviation
+
+```ts
+Formatting.abbreviate(1234); // "1.2K"
+Formatting.abbreviate(1500000); // "1.5M"
+Formatting.abbreviate(2000000000); // "2B"
+Formatting.abbreviate(1500000, 2); // "1.50M"    (2 decimal places)
+
+Formatting.abbreviateIndian(1500000); // "15L"
+Formatting.abbreviateIndian(10000000); // "1Cr"
+Formatting.abbreviateIndian(1000000000); // "1Arab"
+```
+
+| Scale (Western) | Suffix | Value |
+| --------------- | ------ | ----- |
+| Thousand        | K      | 10³   |
+| Million         | M      | 10⁶   |
+| Billion         | B      | 10⁹   |
+| Trillion        | T      | 10¹²  |
+| Quadrillion     | Qa     | 10¹⁵  |
+
+| Scale (Indian) | Suffix | Value |
+| -------------- | ------ | ----- |
+| Thousand       | K      | 10³   |
+| Lakh           | L      | 10⁵   |
+| Crore          | Cr     | 10⁷   |
+| Arab           | Arab   | 10⁹   |
+| Kharab         | Kh     | 10¹¹  |
+
+#### Notation
+
+```ts
+Formatting.toScientific(12345); // "1.2345e+4"
+Formatting.toScientific(12345, 2); // "1.23e+4"
+Formatting.toEngineering(12345); // "12.345×10^3"
+```
+
+#### Other
+
+```ts
+Formatting.toRoman(2026); // "MMXXVI"   (1–3999)
+Formatting.fromRoman("MMXXVI"); // 2026
+Formatting.toFraction(0.333); // "1/3"
+Formatting.toFraction(0.625, 16); // "5/8"     (maxDenominator)
 ```
 
 ---
 
-#### `Matrix.multiply(a, b)`
+### Validation
 
-Standard matrix multiplication.  
-**Throws:** `RangeError` if `cols(A) !== rows(B)`.
+```ts
+import { Validation } from "numwiz";
+```
 
-```js
-Matrix.multiply([[1,2],[3,4]], [[5,6],[7,8]]);
-// [[19,22],[43,50]]
+| Method            | Signature       | Description                      | Example                                   |
+| ----------------- | --------------- | -------------------------------- | ----------------------------------------- |
+| `isNumber`        | `(v)`           | Type guard: finite number        | `Validation.isNumber("5")` → `false`      |
+| `isInteger`       | `(v)`           | Integer check                    | `Validation.isInteger(3.0)` → `true`      |
+| `isFloat`         | `(v)`           | Has decimal part                 | `Validation.isFloat(3.5)` → `true`        |
+| `isFinite`        | `(v)`           | Not ±Infinity or NaN             | `Validation.isFinite(Infinity)` → `false` |
+| `isNaN`           | `(v)`           | Is NaN                           | `Validation.isNaN(NaN)` → `true`          |
+| `isPositive`      | `(v)`           | `> 0`                            | `Validation.isPositive(1)` → `true`       |
+| `isNegative`      | `(v)`           | `< 0`                            | `Validation.isNegative(-1)` → `true`      |
+| `isZero`          | `(v)`           | `=== 0`                          | `Validation.isZero(0)` → `true`           |
+| `isEven`          | `(n)`           | Even integer                     | `Validation.isEven(4)` → `true`           |
+| `isOdd`           | `(n)`           | Odd integer                      | `Validation.isOdd(3)` → `true`            |
+| `isSafeInteger`   | `(v)`           | Within `Number.MAX_SAFE_INTEGER` |                                           |
+| `isWholeNumber`   | `(v)`           | Integer ≥ 0                      |                                           |
+| `isDivisibleBy`   | `(n, d)`        | `n % d === 0`                    | `Validation.isDivisibleBy(10,5)` → `true` |
+| `isInRange`       | `(n, min, max)` | `min ≤ n ≤ max`                  | `Validation.isInRange(5,1,10)` → `true`   |
+| `isPrime`         | `(n)`           | Prime number                     | `Validation.isPrime(17)` → `true`         |
+| `isPerfectSquare` | `(n)`           | Perfect square                   | `Validation.isPerfectSquare(16)` → `true` |
+| `isPerfectCube`   | `(n)`           | Perfect cube                     | `Validation.isPerfectCube(27)` → `true`   |
+| `isPowerOfTwo`    | `(n)`           | Power of 2                       | `Validation.isPowerOfTwo(64)` → `true`    |
+| `isPowerOfN`      | `(num, n)`      | Power of `n`                     | `Validation.isPowerOfN(27,3)` → `true`    |
+| `isPalindrome`    | `(n)`           | Digit palindrome                 | `Validation.isPalindrome(121)` → `true`   |
+| `isArmstrong`     | `(n)`           | Armstrong number                 | `Validation.isArmstrong(153)` → `true`    |
+| `isPerfectNumber` | `(n)`           | Sum of proper divisors = n       | `Validation.isPerfectNumber(6)` → `true`  |
+| `isAbundant`      | `(n)`           | Sum of proper divisors > n       | `Validation.isAbundant(12)` → `true`      |
+| `isDeficient`     | `(n)`           | Sum of proper divisors < n       | `Validation.isDeficient(9)` → `true`      |
+| `isHarshad`       | `(n)`           | Divisible by digit sum           | `Validation.isHarshad(18)` → `true`       |
+
+---
+
+### Comparison
+
+```ts
+import { Comparison } from "numwiz";
+
+Comparison.isEqual(0.1 + 0.2, 0.3); // false (strict ===)
+Comparison.isAlmostEqual(0.1 + 0.2, 0.3); // true  (ε = 1e-10)
+Comparison.isAlmostEqual(0.1 + 0.2, 0.3, 1e-15); // false (custom ε)
+Comparison.isGreaterThan(5, 3); // true
+Comparison.isLessThan(3, 5); // true
+Comparison.isGreaterThanOrEqual(5, 5); // true
+Comparison.isLessThanOrEqual(4, 5); // true
+Comparison.clamp(150, 0, 100); // 100
+Comparison.sign(-5); // -1
+Comparison.sign(0); // 0
+Comparison.sign(5); // 1
+Comparison.max(1, 5, 3, 9, 2); // 9
+Comparison.min(1, 5, 3, 9, 2); // 1
 ```
 
 ---
 
-#### `Matrix.scale(m, scalar)` / `Matrix.scalarMultiply(m, scalar)`
+### Conversion
 
-Multiplies every element by `scalar`. `scalarMultiply` is an alias.
+```ts
+import { Conversion } from "numwiz";
+```
 
-```js
-Matrix.scale([[1,2],[3,4]], 3);   // [[3,6],[9,12]]
+#### Type conversion
+
+```ts
+Conversion.toInteger("42.9"); // 42
+Conversion.toFloat("3.14"); // 3.14
+Conversion.toNumber("100"); // 100  (throws if not parseable)
+Conversion.toString(255); // "255"
+```
+
+#### Base conversion
+
+```ts
+Conversion.toBinary(10); // "1010"
+Conversion.toOctal(8); // "10"
+Conversion.toHex(255); // "FF"
+Conversion.toBase(255, 16); // "ff"
+Conversion.fromBase("ff", 16); // 255
+```
+
+#### Angle
+
+```ts
+Conversion.degreesToRadians(180); // Math.PI
+Conversion.radiansToDegrees(Math.PI); // 180
+```
+
+#### Temperature
+
+```ts
+Conversion.celsiusToFahrenheit(0); // 32
+Conversion.fahrenheitToCelsius(32); // 0
+Conversion.celsiusToKelvin(0); // 273.15
+Conversion.kelvinToCelsius(273.15); // 0
+Conversion.fahrenheitToKelvin(32); // 273.15
+Conversion.kelvinToFahrenheit(273.15); // 32
+```
+
+#### Length & Weight
+
+```ts
+Conversion.kmToMiles(1); // 0.621371
+Conversion.milesToKm(1); // 1.60934
+Conversion.cmToInches(2.54); // 1
+Conversion.inchesToCm(1); // 2.54
+Conversion.metersToFeet(1); // 3.28084
+Conversion.feetToMeters(1); // 0.3048
+
+Conversion.kgToLbs(1); // 2.20462
+Conversion.lbsToKg(1); // 0.453592
+Conversion.gramsToOunces(28.35); // ≈1
+Conversion.ouncesToGrams(1); // 28.3495
+```
+
+#### Data
+
+```ts
+Conversion.bytesToKB(1024); // 1
+Conversion.bytesToMB(1048576); // 1
+Conversion.bytesToGB(1073741824); // 1
+```
+
+#### Time
+
+```ts
+Conversion.secondsToMinutes(120); // 2
+Conversion.minutesToHours(120); // 2
+Conversion.hoursToDays(48); // 2
+Conversion.daysToYears(365.25); // 1
+Conversion.msToSeconds(3000); // 3
 ```
 
 ---
 
-#### `Matrix.scalarDivide(m, scalar)`
+### Bitwise
 
-Divides every element by `scalar`.  
-**Throws:** `Error` if `scalar === 0`.
+```ts
+import { Bitwise } from "numwiz";
+```
+
+All methods validate that inputs are finite numbers and throw `TypeError` otherwise.
+
+| Method               | Signature      | Description                | Example                                        |
+| -------------------- | -------------- | -------------------------- | ---------------------------------------------- |
+| `and`                | `(a, b)`       | Bitwise AND                | `Bitwise.and(5, 3)` → `1`                      |
+| `or`                 | `(a, b)`       | Bitwise OR                 | `Bitwise.or(5, 3)` → `7`                       |
+| `xor`                | `(a, b)`       | Bitwise XOR                | `Bitwise.xor(5, 3)` → `6`                      |
+| `not`                | `(a)`          | Bitwise NOT                | `Bitwise.not(5)` → `-6`                        |
+| `leftShift`          | `(a, bits)`    | Left shift `<<`            | `Bitwise.leftShift(1, 4)` → `16`               |
+| `rightShift`         | `(a, bits)`    | Signed right shift `>>`    | `Bitwise.rightShift(16, 2)` → `4`              |
+| `unsignedRightShift` | `(a, bits)`    | Unsigned right shift `>>>` | `Bitwise.unsignedRightShift(-1, 0)`            |
+| `getBit`             | `(num, pos)`   | Get bit at position        | `Bitwise.getBit(5, 0)` → `1`                   |
+| `setBit`             | `(num, pos)`   | Set bit at position        | `Bitwise.setBit(5, 1)` → `7`                   |
+| `clearBit`           | `(num, pos)`   | Clear bit at position      | `Bitwise.clearBit(7, 1)` → `5`                 |
+| `toggleBit`          | `(num, pos)`   | Toggle bit                 | `Bitwise.toggleBit(5, 1)` → `7`                |
+| `isBitSet`           | `(num, pos)`   | Check if bit is set        | `Bitwise.isBitSet(5, 0)` → `true`              |
+| `countBits`          | `(num)`        | Count set bits (popcount)  | `Bitwise.countBits(7)` → `3`                   |
+| `isPowerOfTwo`       | `(n)`          | `n > 0 && (n & n-1) === 0` | `Bitwise.isPowerOfTwo(64)` → `true`            |
+| `nearestPowerOfTwo`  | `(n)`          | Closest power of 2         | `Bitwise.nearestPowerOfTwo(5)` → `4`           |
+| `nextPowerOfTwo`     | `(n)`          | Next higher power of 2     | `Bitwise.nextPowerOfTwo(5)` → `8`              |
+| `xorSwap`            | `(a, b)`       | Swap via XOR               | `Bitwise.xorSwap(3, 7)` → `[7, 3]`             |
+| `toBinaryString`     | `(num, bits?)` | Zero-padded binary string  | `Bitwise.toBinaryString(10, 8)` → `"00001010"` |
 
 ---
 
-#### `Matrix.scalarAdd(m, scalar)` / `Matrix.scalarSubtract(m, scalar)`
+### Trigonometry
 
-Adds / subtracts a constant from every element.
+```ts
+import { Trigonometry } from "numwiz";
+```
 
----
+All angle arguments are in **radians** unless explicitly noted.
 
-#### `Matrix.negate(m)`
+#### Basic
 
-Equivalent to `Matrix.scale(m, -1)`.
+```ts
+Trigonometry.sin(Math.PI / 2); // 1
+Trigonometry.cos(0); // 1
+Trigonometry.tan(Math.PI / 4); // ≈1
+```
 
----
+#### Inverse (throws `RangeError` for out-of-domain inputs)
 
-#### `Matrix.hadamard(a, b)`
+```ts
+Trigonometry.asin(1); // Math.PI/2   (input must be [-1, 1])
+Trigonometry.acos(1); // 0           (input must be [-1, 1])
+Trigonometry.atan(1); // Math.PI/4
+Trigonometry.atan2(1, 1); // Math.PI/4
+```
 
-Element-wise (Hadamard) product of two same-size matrices.
+#### Hyperbolic
 
-```js
-Matrix.hadamard([[1,2],[3,4]], [[2,3],[4,5]]);
-// [[2,6],[12,20]]
+```ts
+Trigonometry.sinh(0); // 0
+Trigonometry.cosh(0); // 1
+Trigonometry.tanh(0); // 0
+Trigonometry.asinh(0); // 0
+Trigonometry.acosh(1); // 0   (input must be ≥ 1)
+Trigonometry.atanh(0); // 0   (input must be in (-1, 1))
+```
+
+#### Reciprocal
+
+```ts
+Trigonometry.sec(0); // 1   (1/cos, throws if cos=0)
+Trigonometry.csc(Math.PI / 2); // 1   (1/sin, throws if sin=0)
+Trigonometry.cot(Math.PI / 4); // ≈1  (1/tan, throws if tan=0)
+```
+
+#### Angle Conversion
+
+```ts
+Trigonometry.toRadians(180); // Math.PI
+Trigonometry.toDegrees(Math.PI); // 180
+Trigonometry.normalizeDegrees(370); // 10   (wraps to [0, 360))
+Trigonometry.normalizeRadians(7); // ≈0.72 (wraps to [0, 2π))
+```
+
+#### Triangle Helpers
+
+```ts
+Trigonometry.hypot(3, 4); // 5
+Trigonometry.hypot(1, 1, 1); // √3
+Trigonometry.lawOfCosinesSide(3, 4, Math.PI / 3); // side opposite angle C
+Trigonometry.lawOfCosinesAngle(3, 4, 5); // angle (radians) opposite side c=5
+Trigonometry.lawOfSinesSide(3, Math.PI / 6, Math.PI / 4); // third side
+Trigonometry.lawOfSinesAngle(3, 4, Math.PI / 6); // angle B
+Trigonometry.triangleArea(3, 4, Math.PI / 6); // 3
+```
+
+#### Logarithms (all throw `RangeError` for invalid inputs)
+
+```ts
+Trigonometry.log(Math.E); // 1     (natural log, n > 0)
+Trigonometry.log2(8); // 3
+Trigonometry.log10(100); // 2
+Trigonometry.logN(8, 2); // 3     (log base n)
+Trigonometry.exp(1); // ≈2.718
+Trigonometry.log1p(0); // 0     (ln(1 + n))
+Trigonometry.expm1(0); // 0     (e^n - 1)
 ```
 
 ---
 
-#### `Matrix.elementDivide(a, b)`
+### Statistics
 
-Element-wise division. **Throws:** `Error` on any zero divisor.
+```ts
+import { Statistics } from "numwiz";
+
+const data = [2, 4, 4, 4, 5, 5, 7, 9];
+```
+
+| Method           | Signature           | Description           | Example                                                 |
+| ---------------- | ------------------- | --------------------- | ------------------------------------------------------- |
+| `sum`            | `(arr)`             | Sum of array          | `Statistics.sum(data)` → `40`                           |
+| `mean`           | `(arr)`             | Arithmetic mean       | `Statistics.mean(data)` → `5`                           |
+| `median`         | `(arr)`             | Middle value          | `Statistics.median(data)` → `4.5`                       |
+| `mode`           | `(arr)`             | Most frequent values  | `Statistics.mode(data)` → `[4]`                         |
+| `min`            | `(arr)`             | Minimum               | `Statistics.min(data)` → `2`                            |
+| `max`            | `(arr)`             | Maximum               | `Statistics.max(data)` → `9`                            |
+| `range`          | `(arr)`             | max - min             | `Statistics.range(data)` → `7`                          |
+| `variance`       | `(arr)`             | Population variance   | `Statistics.variance(data)` → `3.5`                     |
+| `stdDev`         | `(arr)`             | Population std dev    | `Statistics.stdDev(data)` → `≈1.87`                     |
+| `sampleVariance` | `(arr)`             | Sample variance (n-1) | `Statistics.sampleVariance(data)` → `4`                 |
+| `sampleStdDev`   | `(arr)`             | Sample std dev        | `Statistics.sampleStdDev(data)` → `2`                   |
+| `percentile`     | `(arr, p)`          | p-th percentile       | `Statistics.percentile(data, 75)` → `5.5`               |
+| `quartiles`      | `(arr)`             | Q1, Q2, Q3 object     | `Statistics.quartiles(data)` → `{Q1:4, Q2:4.5, Q3:5.5}` |
+| `iqr`            | `(arr)`             | Interquartile range   | `Statistics.iqr(data)` → `1.5`                          |
+| `geometricMean`  | `(arr)`             | Geometric mean        | `Statistics.geometricMean([1,2,4,8])` → `≈2.83`         |
+| `harmonicMean`   | `(arr)`             | Harmonic mean         | `Statistics.harmonicMean([1,2,4])` → `≈1.71`            |
+| `weightedMean`   | `(values, weights)` | Weighted average      | `Statistics.weightedMean([1,2,3],[1,2,1])` → `2`        |
+| `zScore`         | `(value, arr)`      | Z-score               | `Statistics.zScore(9, data)` → `≈2.14`                  |
+| `correlation`    | `(x, y)`            | Pearson correlation   | `Statistics.correlation([1,2,3],[2,4,6])` → `1`         |
+| `frequency`      | `(arr)`             | Value counts map      | `Statistics.frequency([1,1,2,3])` → `{1:2, 2:1, 3:1}`   |
+| `skewness`       | `(arr)`             | Distribution skewness | `Statistics.skewness(data)` → `≈0.95`                   |
 
 ---
 
-#### `Matrix.elementPower(m, exp)`
+### Financial
 
-Raises every element to the power `exp`.
+```ts
+import { Financial } from "numwiz";
+```
 
-```js
-Matrix.elementPower([[1,2],[3,4]], 2);   // [[1,4],[9,16]]
+| Method                 | Signature                         | Description              | Example                                               |
+| ---------------------- | --------------------------------- | ------------------------ | ----------------------------------------------------- |
+| `simpleInterest`       | `(principal, rate, time)`         | SI = P×R×T/100           | `Financial.simpleInterest(10000, 5, 3)` → `1500`      |
+| `compoundInterest`     | `(principal, rate, time, n?)`     | CI (default n=1/year)    | `Financial.compoundInterest(10000, 5, 3)` → `≈1576`   |
+| `emi`                  | `(principal, annualRate, months)` | Monthly loan EMI         | `Financial.emi(500000, 10, 120)` → `≈6607`            |
+| `futureValue`          | `(pv, rate, periods)`             | FV of investment         | `Financial.futureValue(10000, 8, 5)` → `≈14693`       |
+| `presentValue`         | `(fv, rate, periods)`             | PV of future sum         | `Financial.presentValue(14693, 8, 5)` → `≈10000`      |
+| `roi`                  | `(gain, cost)`                    | Return on investment %   | `Financial.roi(15000, 10000)` → `50`                  |
+| `cagr`                 | `(start, end, years)`             | Compound annual growth % | `Financial.cagr(10000, 20000, 5)` → `≈14.87`          |
+| `grossProfit`          | `(revenue, cogs)`                 | Revenue - COGS           | `Financial.grossProfit(50000, 30000)` → `20000`       |
+| `grossMargin`          | `(revenue, cogs)`                 | Gross profit %           | `Financial.grossMargin(50000, 30000)` → `40`          |
+| `netProfit`            | `(revenue, expenses)`             | Revenue - Expenses       | `Financial.netProfit(50000, 40000)` → `10000`         |
+| `markup`               | `(cost, sellingPrice)`            | Markup % on cost         | `Financial.markup(30000, 50000)` → `≈66.67`           |
+| `discount`             | `(original, discountPct)`         | Price after discount     | `Financial.discount(1000, 20)` → `800`                |
+| `taxAmount`            | `(amount, taxRate)`               | Tax portion              | `Financial.taxAmount(1000, 18)` → `180`               |
+| `priceWithTax`         | `(amount, taxRate)`               | Amount inclusive of tax  | `Financial.priceWithTax(1000, 18)` → `1180`           |
+| `sipFutureValue`       | `(monthly, annualRate, years)`    | SIP maturity amount      | `Financial.sipFutureValue(5000, 12, 10)` → `≈1163390` |
+| `amortizationSchedule` | `(principal, annualRate, months)` | Full amortization table  | Returns `AmortizationEntry[]`                         |
+
+#### `amortizationSchedule` example
+
+```ts
+const schedule = Financial.amortizationSchedule(500000, 10, 12);
+schedule[0];
+// {
+//   month: 1,
+//   emi: 43956.46,
+//   principal: 39789.79,
+//   interest: 4166.67,
+//   balance: 460210.21
+// }
 ```
 
 ---
 
-#### `Matrix.power(m, n)`
+### Advanced
 
-Integer matrix exponentiation — repeated matrix multiplication.
+```ts
+import { Advanced } from "numwiz";
+```
 
-| Parameter | Type | Constraint |
-|-----------|------|-----------|
-| `m` | `number[][]` | Must be square |
-| `n` | `number` | Non-negative integer |
+#### Combinatorics
 
-**Throws:** `RangeError` if `m` is not square or `n < 0`.
+```ts
+Advanced.factorial(5); // 120
+Advanced.permutation(5, 2); // 20
+Advanced.combination(5, 2); // 10
+Advanced.catalan(5); // 42
+Advanced.pascal(4); // [1, 4, 6, 4, 1]
+```
 
-```js
-Matrix.power([[1,1],[0,1]], 3);   // [[1,3],[0,1]]
-Matrix.power([[2,0],[0,3]], 0);   // identity [[1,0],[0,1]]
+#### Number Theory
+
+```ts
+Advanced.gcd(12, 8); // 4
+Advanced.lcm(4, 6); // 12
+Advanced.gcdArray([12, 8, 6]); // 2
+Advanced.lcmArray([4, 6, 10]); // 60
+Advanced.primeFactors(60); // [2, 2, 3, 5]
+Advanced.divisors(12); // [1, 2, 3, 4, 6, 12]
+Advanced.sumOfDivisors(12); // 28
+Advanced.nextPrime(10); // 11
+Advanced.primesInRange(10, 30); // [11, 13, 17, 19, 23, 29]
+Advanced.eulerTotient(12); // 4
+```
+
+#### Sequences
+
+```ts
+Advanced.fibonacci(10); // 55   (10th Fibonacci number)
+Advanced.fibonacciSequence(8); // [0, 1, 1, 2, 3, 5, 8, 13]
+Advanced.collatz(6); // [6, 3, 10, 5, 16, 8, 4, 2, 1]
+```
+
+#### Digit Operations
+
+```ts
+Advanced.digitSum(12345); // 15
+Advanced.digitalRoot(9875); // 2
+Advanced.countDigits(12345); // 5
+Advanced.reverseNumber(12345); // 54321
+Advanced.isPalindrome(121); // true
+```
+
+#### Math Utilities
+
+```ts
+Advanced.lerp(0, 100, 0.5); // 50    (linear interpolation)
+Advanced.inverseLerp(0, 100, 50); // 0.5   (inverse lerp)
+Advanced.map(5, 0, 10, 0, 100); // 50    (remap from [0,10] to [0,100])
+Advanced.percentageOf(15, 200); // 30    (15% of 200)
+Advanced.whatPercent(30, 200); // 15    (30 is what% of 200)
+Advanced.percentChange(80, 100); // 25    (% increase from 80 to 100)
 ```
 
 ---
 
-### Transformations
+### Sequences
 
----
+```ts
+import { Sequences } from "numwiz";
+```
 
-#### `Matrix.transpose(m)`
+| Method       | Signature               | Description                  | Example                                         |
+| ------------ | ----------------------- | ---------------------------- | ----------------------------------------------- |
+| `fibonacci`  | `(count)`               | Fibonacci sequence           | `Sequences.fibonacci(6)` → `[0,1,1,2,3,5]`      |
+| `lucas`      | `(count)`               | Lucas numbers                | `Sequences.lucas(5)` → `[2,1,3,4,7]`            |
+| `primes`     | `(count)`               | First N primes               | `Sequences.primes(5)` → `[2,3,5,7,11]`          |
+| `triangular` | `(count)`               | Triangular numbers           | `Sequences.triangular(5)` → `[1,3,6,10,15]`     |
+| `square`     | `(count)`               | Square numbers               | `Sequences.square(5)` → `[1,4,9,16,25]`         |
+| `cube`       | `(count)`               | Cube numbers                 | `Sequences.cube(5)` → `[1,8,27,64,125]`         |
+| `arithmetic` | `(start, diff, count)`  | Arithmetic progression       | `Sequences.arithmetic(1, 2, 5)` → `[1,3,5,7,9]` |
+| `geometric`  | `(start, ratio, count)` | Geometric progression        | `Sequences.geometric(1, 2, 5)` → `[1,2,4,8,16]` |
+| `custom`     | `(count, fn)`           | Custom sequence via index fn | `Sequences.custom(4, i => i*i)` → `[0,1,4,9]`   |
 
-```js
-Matrix.transpose([[1,2,3],[4,5,6]]);
-// [[1,4],[2,5],[3,6]]
+```ts
+// Custom sequence examples
+Sequences.custom(5, (i) => 2 ** i); // [1, 2, 4, 8, 16]
+Sequences.custom(5, (i) => i * 3 + 1); // [1, 4, 7, 10, 13]
 ```
 
 ---
 
-#### `Matrix.minor(m, row, col)` → `number[][]`
+### Random
 
-Returns the sub-matrix obtained by removing row `row` and column `col`.
+```ts
+import { Random } from "numwiz";
+```
 
-```js
-Matrix.minor([[1,2,3],[4,5,6],[7,8,9]], 1, 1);
-// [[1,3],[7,9]]
+| Method         | Signature             | Description                         | Example                            |
+| -------------- | --------------------- | ----------------------------------- | ---------------------------------- |
+| `float`        | `()`                  | Random float `[0, 1)`               | `Random.float()`                   |
+| `floatBetween` | `(min, max)`          | Random float in `[min, max)`        | `Random.floatBetween(1, 5)`        |
+| `intBetween`   | `(min, max)`          | Random integer (inclusive)          | `Random.intBetween(1, 10)`         |
+| `boolean`      | `()`                  | Random true/false                   | `Random.boolean()`                 |
+| `coin`         | `()`                  | `"heads"` or `"tails"`              | `Random.coin()`                    |
+| `dice`         | `(sides?)`            | Roll a die (default 6)              | `Random.dice(20)` → `1–20`         |
+| `pick`         | `<T>(arr)`            | Random element                      | `Random.pick([10, 20, 30])`        |
+| `shuffle`      | `<T>(arr)`            | Shuffled copy (new array)           | `Random.shuffle([1,2,3,4,5])`      |
+| `sample`       | `<T>(arr, count)`     | Random subset                       | `Random.sample([1,2,3,4,5], 3)`    |
+| `generateList` | `(count, min?, max?)` | N random integers (repeats allowed) | `Random.generateList(5, 1, 10)`    |
+| `uniqueList`   | `(count, min?, max?)` | N unique random integers            | `Random.uniqueList(5, 1, 20)`      |
+| `gaussian`     | `(mean?, stdDev?)`    | Normal distribution sample          | `Random.gaussian(0, 1)`            |
+| `weighted`     | `<T>(items)`          | Weighted random pick                | See example below                  |
+| `uuid`         | `()`                  | UUID v4 string                      | `Random.uuid()` → `"xxxxxxxx-..."` |
+
+```ts
+// Weighted random
+Random.weighted([
+  { value: "common", weight: 70 },
+  { value: "rare", weight: 25 },
+  { value: "epic", weight: 5 },
+]);
+// returns "common" ~70% of the time
 ```
 
 ---
 
-#### `Matrix.cofactor(m, row, col)` → `number`
+### Range
 
-Signed minor: `(-1)^(row+col) * det(minor(m, row, col))`.
+```ts
+import { Range } from "numwiz";
+```
 
----
+| Method     | Signature             | Description                   | Example                                              |
+| ---------- | --------------------- | ----------------------------- | ---------------------------------------------------- |
+| `create`   | `(start, end, step?)` | Generate number array         | `Range.create(1, 5)` → `[1,2,3,4,5]`                 |
+| `includes` | `(num, min, max)`     | Check membership `[min, max]` | `Range.includes(5, 1, 10)` → `true`                  |
+| `wrap`     | `(num, min, max)`     | Wrap around range             | `Range.wrap(370, 0, 360)` → `10`                     |
+| `bounce`   | `(num, min, max)`     | Bounce / ping-pong            | `Range.bounce(7, 0, 5)` → `3`                        |
+| `chunk`    | `(start, end, size)`  | Split range into chunks       | `Range.chunk(1, 9, 3)` → `[[1,2,3],[4,5,6],[7,8,9]]` |
 
-#### `Matrix.cofactorMatrix(m)` → `number[][]`
-
-Matrix of cofactors for every position.
-
----
-
-#### `Matrix.adjugate(m)` → `number[][]`
-
-Transpose of the cofactor matrix.
-
----
-
-#### `Matrix.inverse(m)` → `number[][]`
-
-Computes the matrix inverse via Gauss-Jordan elimination with partial pivoting.
-
-**Throws:**
-- `RangeError` — if `m` is not square
-- `Error` — if `m` is singular (`|det| < 1e-12`)
-
-```js
-const inv = Matrix.inverse([[4,7],[2,6]]);
-// [[0.6,-0.7],[-0.2,0.4]]
-
-Matrix.inverse([[1,2],[2,4]]);   // throws Error (singular)
+```ts
+Range.create(0, 10, 2); // [0, 2, 4, 6, 8, 10]
+Range.create(10, 1, -3); // [10, 7, 4, 1]  (negative step)
+Range.wrap(370, 0, 360); // 10
+Range.bounce(7, 0, 5); // 3
+Range.chunk(1, 9, 3); // [[1,2,3],[4,5,6],[7,8,9]]
 ```
 
 ---
 
-### Scalar Properties & Reduction
+### Currency
+
+```ts
+import { Currency } from "numwiz";
+```
+
+| Method              | Signature                      | Description                  | Example                                                           |
+| ------------------- | ------------------------------ | ---------------------------- | ----------------------------------------------------------------- |
+| `format`            | `(amount, currency?, locale?)` | Intl.NumberFormat formatting | `Currency.format(1234567, "USD")` → `"$1,234,567.00"`             |
+| `formatIndian`      | `(amount, symbol?)`            | Indian comma grouping        | `Currency.formatIndian(1234567, "₹")` → `"₹12,34,567.00"`         |
+| `getSymbol`         | `(code)`                       | Currency symbol lookup       | `Currency.getSymbol("INR")` → `"₹"`                               |
+| `convert`           | `(amount, fromRate, toRate)`   | Currency rate conversion     | `Currency.convert(100, 1, 83)` → `8300`                           |
+| `abbreviateWestern` | `(amount, symbol?, decimals?)` | Western abbreviation         | `Currency.abbreviateWestern(1500000, "$")` → `"$1.5M"`            |
+| `abbreviateIndian`  | `(amount, symbol?, decimals?)` | Indian abbreviation          | `Currency.abbreviateIndian(1500000, "₹")` → `"₹15.0 L"`           |
+| `toWords`           | `(amount, currency?, locale?)` | Western scale words          | `Currency.toWords(150, "USD")` → `"one hundred fifty dollars"`    |
+| `toWordsIndian`     | `(amount, currency?, locale?)` | Indian-scale words           | `Currency.toWordsIndian(150, "INR", "hi")` → `"एक सौ पचास रुपये"` |
+| `toWordsHindi`      | `(amount, currency?)`          | Hindi convenience method     | `Currency.toWordsHindi(1500)` → `"पंद्रह सौ रुपये"`               |
+
+**Supported currency symbols:** `USD ($)`, `EUR (€)`, `GBP (£)`, `INR (₹)`, `JPY/CNY (¥)`, `AUD (A$)`, `CAD (C$)`, `BDT (৳)`, `PKR (₨)`, `BRL (R$)`, `RUB (₽)`, `KRW (₩)`, `TRY (₺)`, `THB (฿)`, `PHP (₱)`, `VND (₫)`, `NGN (₦)`, and more.
 
 ---
 
-#### `Matrix.determinant(m)` → `number`
+### NumberWords
 
-Computes the determinant. Uses direct formulas for 1×1, 2×2, 3×3; LU decomposition for larger matrices.
+Direct access to the multi-locale word conversion engine.
 
-**Throws:** `RangeError` if not square.
+```ts
+import { NumberWords } from "numwiz";
 
-```js
-Matrix.determinant([[4,7],[2,6]]);   // 10
-Matrix.determinant([[1,2,3],[4,5,6],[7,8,9]]);   // 0  (singular)
+NumberWords.toWords(42); // "forty-two"
+NumberWords.toWords(42, "hi"); // "बयालीस"
+NumberWords.toWords(42, "de"); // "zweiundvierzig"
+NumberWords.toWords(42, "es"); // "cuarenta y dos"
+NumberWords.toWords(42, "fr"); // "quarante-deux"
+NumberWords.toWords(1000000, "en", "indian"); // "ten lakh"
+NumberWords.toWords(1000000, "en", "western"); // "one million"
+NumberWords.toWordsIndian(1500000, "en"); // "fifteen lakh"
+NumberWords.toWordsWestern(1500000, "en"); // "one million five hundred thousand"
+NumberWords.currencyToWords(150, "USD", "en", "western"); // "one hundred fifty dollars"
 ```
 
 ---
 
-#### `Matrix.trace(m)` → `number`
+### Matrix
 
-Sum of the main diagonal.  
-**Throws:** `RangeError` if not square.
+Full-featured matrix library with both a **static functional API** (plain arrays in, plain arrays out) and a **chainable instance API** (fluent builder pattern).
 
-```js
-Matrix.trace([[1,2],[3,4]]);   // 5
+```ts
+import { Matrix } from "numwiz";
+// or via subpath
+import Matrix from "numwiz/matrix";
+```
+
+#### Creation
+
+| Method         | Signature                             | Description              | Example                                    |
+| -------------- | ------------------------------------- | ------------------------ | ------------------------------------------ |
+| `create`       | `(rows, cols, fill?)`                 | Matrix filled with value | `Matrix.create(2,3)` → `[[0,0,0],[0,0,0]]` |
+| `identity`     | `(n)`                                 | n×n identity             | `Matrix.identity(3)`                       |
+| `zeros`        | `(rows, cols)`                        | All zeros                | `Matrix.zeros(2,2)`                        |
+| `ones`         | `(rows, cols)`                        | All ones                 | `Matrix.ones(2,2)`                         |
+| `fill`         | `(rows, cols, v)`                     | Filled with `v`          | `Matrix.fill(2,2,7)`                       |
+| `diagonal`     | `(values)`                            | Diagonal matrix          | `Matrix.diagonal([1,2,3])`                 |
+| `random`       | `(rows, cols, min?, max?, integers?)` | Random matrix            | `Matrix.random(3,3,0,10,true)`             |
+| `fromFlat`     | `(flat, rows, cols)`                  | Reshape 1D to 2D         | `Matrix.fromFlat([1,2,3,4],2,2)`           |
+| `columnVector` | `(values)`                            | n×1 matrix               | `Matrix.columnVector([1,2,3])`             |
+| `rowVector`    | `(values)`                            | 1×n matrix               | `Matrix.rowVector([1,2,3])`                |
+| `rotation2D`   | `(angle)`                             | 2×2 rotation             | `Matrix.rotation2D(Math.PI/2)`             |
+| `scaling`      | `(...factors)`                        | Diagonal scale matrix    | `Matrix.scaling(2,3)`                      |
+| `hilbert`      | `(n)`                                 | Hilbert matrix           | `Matrix.hilbert(3)`                        |
+| `vandermonde`  | `(values, cols)`                      | Vandermonde matrix       | `Matrix.vandermonde([1,2,3],4)`            |
+
+#### Inspection
+
+```ts
+const m = [
+  [1, 2, 3],
+  [4, 5, 6],
+];
+
+Matrix.shape(m); // [2, 3]
+Matrix.rows(m); // 2
+Matrix.cols(m); // 3
+Matrix.size(m); // 6
+Matrix.get(m, 0, 1); // 2
+Matrix.set(m, 0, 0, 9); // [[9,2,3],[4,5,6]]  (returns new matrix)
+Matrix.getRow(m, 1); // [4, 5, 6]
+Matrix.getCol(m, 0); // [1, 4]
+Matrix.getDiagonal(m); // [1, 5]
+Matrix.flatten(m); // [1,2,3,4,5,6]
+Matrix.clone(m); // deep copy
+```
+
+#### Arithmetic
+
+```ts
+const A = [
+    [1, 2],
+    [3, 4],
+  ],
+  B = [
+    [5, 6],
+    [7, 8],
+  ];
+
+Matrix.add(A, B); // [[6,8],[10,12]]
+Matrix.subtract(A, B); // [[-4,-4],[-4,-4]]
+Matrix.multiply(A, B); // [[19,22],[43,50]]
+Matrix.scale(A, 3); // [[3,6],[9,12]]
+Matrix.negate(A); // [[-1,-2],[-3,-4]]
+Matrix.hadamard(A, B); // [[5,12],[21,32]]
+Matrix.elementDivide(A, B); // element-wise division
+Matrix.elementPower(A, 2); // [[1,4],[9,16]]
+Matrix.power(A, 3); // A³
+Matrix.scalarAdd(A, 10); // [[11,12],[13,14]]
+Matrix.scalarSubtract(A, 1); // [[0,1],[2,3]]
+```
+
+#### Transformations
+
+```ts
+Matrix.transpose([
+  [1, 2, 3],
+  [4, 5, 6],
+]); // [[1,4],[2,5],[3,6]]
+Matrix.inverse([
+  [4, 7],
+  [2, 6],
+]); // [[0.6,-0.7],[-0.2,0.4]]
+Matrix.adjugate(A);
+Matrix.cofactor(A, 0, 0); // cofactor at [0,0]
+Matrix.cofactorMatrix(A);
+Matrix.minor(A, 0, 0); // sub-matrix without row 0 col 0
+```
+
+#### Row / Column Operations
+
+```ts
+Matrix.swapRows(A, 0, 1);
+Matrix.swapCols(A, 0, 1);
+Matrix.scaleRow(A, 0, 2);
+Matrix.addRowMultiple(A, 1, 0, -2); // row1 += -2 * row0
+Matrix.ref(A); // row echelon form
+Matrix.rref(A); // reduced row echelon form
+```
+
+#### Scalar Properties
+
+```ts
+Matrix.determinant([
+  [1, 2],
+  [3, 4],
+]); // -2
+Matrix.trace([
+  [1, 2],
+  [3, 4],
+]); // 5
+Matrix.rank([
+  [1, 2],
+  [2, 4],
+]); // 1
+Matrix.sum(A); // 10
+Matrix.min(A); // 1
+Matrix.max(A); // 4
+Matrix.mean(A); // 2.5
+Matrix.normFrobenius(A); // ≈5.477
+Matrix.normInf(A); // max absolute row sum
+Matrix.norm1(A); // max absolute col sum
+Matrix.sumAxis(A, "row"); // [3, 7]
+Matrix.sumAxis(A, "col"); // [4, 6]
+```
+
+#### Decomposition & Solving
+
+```ts
+const { L, U, P } = Matrix.lu(A); // PA = LU
+const { Q, R } = Matrix.qr(A); // A = QR
+Matrix.eigenvalues([
+  [2, 1],
+  [1, 2],
+]); // [3, 1]
+Matrix.eigenvalues2x2([
+  [0, -1],
+  [1, 0],
+]); // [{ real:0, imag:1 }, ...]
+Matrix.solve(
+  [
+    [2, 1],
+    [1, 3],
+  ],
+  [5, 10]
+); // [[1],[3]]
+Matrix.solveCramer(
+  [
+    [2, 1],
+    [1, 3],
+  ],
+  [5, 10]
+); // [[1],[3]]
+```
+
+#### Boolean Checks
+
+```ts
+Matrix.isSquare(A); // true
+Matrix.isIdentity(Matrix.identity(3)); // true
+Matrix.isSymmetric([
+  [1, 2],
+  [2, 1],
+]); // true
+Matrix.isDiagonal(Matrix.diagonal([1, 2])); // true
+Matrix.isUpperTriangular([
+  [1, 2],
+  [0, 3],
+]); // true
+Matrix.isLowerTriangular([
+  [1, 0],
+  [2, 3],
+]); // true
+Matrix.isOrthogonal(Matrix.identity(2)); // true
+Matrix.isSingular([
+  [1, 2],
+  [2, 4],
+]); // true
+Matrix.isZero(Matrix.zeros(2, 2)); // true
+Matrix.isVector([[1, 2, 3]]); // true
+Matrix.isRowVector([[1, 2, 3]]); // true
+Matrix.isColumnVector([[1], [2], [3]]); // true
+Matrix.isSameShape(A, B); // true
+Matrix.equals(A, A); // true
+Matrix.isEqual(A, A, 1e-10); // true
+```
+
+#### Vector Operations
+
+```ts
+Matrix.dot([1, 2, 3], [4, 5, 6]); // 32
+Matrix.cross([1, 0, 0], [0, 1, 0]); // [0,0,1]
+Matrix.magnitude([3, 4]); // 5
+Matrix.normalize([3, 4]); // [0.6, 0.8]
+Matrix.angleBetween([1, 0], [0, 1]); // Math.PI/2
+```
+
+#### Aggregation
+
+```ts
+Matrix.rowSums(m); // n×1 column vector of row sums
+Matrix.colSums(m); // 1×n row vector of col sums
+Matrix.rowMeans(m); // n×1 column vector of row means
+Matrix.colMeans(m); // 1×n row vector of col means
+```
+
+#### Functional / Element-wise
+
+```ts
+Matrix.map(m, (v, i, j) => v * 2); // double every element
+Matrix.forEach(m, (v, i, j) => {}); // iterate (returns void)
+Matrix.every(m, (v) => v > 0); // true if all elements match
+Matrix.some(m, (v) => v > 5); // true if any element matches
+Matrix.round(m, 2); // round to 2 decimal places
+Matrix.abs(m); // |element| for all elements
+```
+
+#### Structure
+
+```ts
+Matrix.hStack(A, B); // horizontal concat (same rows)
+Matrix.vStack(A, B); // vertical concat (same cols)
+Matrix.hConcat(A, B); // alias for hStack
+Matrix.vConcat(A, B); // alias for vStack
+Matrix.slice(m, 0, 0, 2, 2); // sub-matrix [start, end) exclusive
+Matrix.subMatrix(m, 0, 0, 2, 2); // alias for slice
+Matrix.reshape([[1, 2, 3, 4, 5, 6]], 2, 3); // [[1,2,3],[4,5,6]]
+```
+
+#### Display
+
+```ts
+Matrix.toString(A); // formatted grid with box-drawing chars
+Matrix.print(A); // console.log + returns matrix
+Matrix.toHTML(A); // <table> HTML string
+Matrix.toJSON(A); // { rows: 2, cols: 2, data: [[...]] }
+Matrix.fromJSON(json); // number[][] from JSON object
+```
+
+#### Chainable Instance API
+
+```ts
+const result = new Matrix([
+  [1, 2],
+  [3, 4],
+])
+  .add([
+    [10, 20],
+    [30, 40],
+  ])
+  .multiply([
+    [1, 0],
+    [0, 1],
+  ])
+  .scale(2)
+  .transpose()
+  .round(4)
+  .toArray(); // → number[][]
+
+// Scalar terminal methods
+new Matrix([
+  [1, 2],
+  [3, 4],
+]).determinant(); // -2
+new Matrix([
+  [1, 2],
+  [3, 4],
+]).trace(); // 5
+
+// Boolean terminal methods
+new Matrix([
+  [1, 0],
+  [0, 1],
+]).isIdentity(); // true
+
+// Decomposition & solving
+const { L, U, P } = new Matrix(A).lu();
+const { Q, R } = new Matrix(A).qr();
+new Matrix([
+  [2, 1],
+  [1, 3],
+])
+  .solve([[5], [10]])
+  .toArray(); // [[1],[3]]
+```
+
+**Chainable methods:** `add`, `subtract`, `multiply`, `scale`, `negate`, `hadamard`, `elementDivide`, `elementPower`, `power`, `scalarAdd`, `scalarSubtract`, `transpose`, `inverse`, `adjugate`, `ref`, `rref`, `solve`, `hStack`, `vStack`, `slice`, `reshape`, `swapRows`, `swapCols`, `map`, `round`, `abs`, `clone`, `print`
+
+**Terminal methods:** `toArray`, `flatten`, `getDiagonal`, `getRows`, `getCols`, `getShape`, `getSize`, `getElement`, `determinant`, `trace`, `sum`, `min`, `max`, `mean`, `rank`, `norm`, `normFrobenius`, `eigenvalues`, `isSquare`, `isIdentity`, `isSymmetric`, `isDiagonal`, `isUpperTriangular`, `isLowerTriangular`, `isOrthogonal`, `isSingular`, `isZero`, `equals`, `isEqual`, `toString`, `lu`, `qr`
+
+---
+
+## Subpath Imports
+
+Each module is independently importable for tree-shaking:
+
+```ts
+import Arithmetic from "numwiz/arithmetic";
+import Comparison from "numwiz/comparison";
+import Validation from "numwiz/validation";
+import Conversion from "numwiz/conversion";
+import Bitwise from "numwiz/bitwise";
+import Trigonometry from "numwiz/trigonometry";
+import Range from "numwiz/range";
+import Statistics from "numwiz/statistics";
+import Financial from "numwiz/financial";
+import Sequences from "numwiz/sequences";
+import Random from "numwiz/random";
+import Advanced from "numwiz/advanced";
+import Formatting from "numwiz/formatting";
+import Currency from "numwiz/currency";
+import Matrix from "numwiz/matrix";
+import NumberWords from "numwiz/number-words";
+
+// Types only
+import type { Matrix2D, LUResult, QRResult } from "numwiz/types";
 ```
 
 ---
 
-#### `Matrix.sum(m)` → `number`
+## Supported Locales
 
-Sum of all elements.
+| Code | Language | Preferred scale  |
+| ---- | -------- | ---------------- |
+| `en` | English  | Western & Indian |
+| `hi` | Hindi    | Indian           |
+| `de` | German   | Western          |
+| `es` | Spanish  | Western          |
+| `fr` | French   | Western          |
+| `ar` | Arabic   | Western          |
+| `bn` | Bengali  | Indian           |
+| `mr` | Marathi  | Indian           |
+| `gu` | Gujarati | Indian           |
+| `ta` | Tamil    | Indian           |
 
----
+### Examples
 
-#### `Matrix.min(m)` / `Matrix.max(m)` / `Matrix.mean(m)` → `number`
+```ts
+import { Formatting } from "numwiz";
 
-Global minimum, maximum, and arithmetic mean across all elements.
+Formatting.toWords(42, "en"); // "forty-two"
+Formatting.toWords(42, "hi"); // "बयालीस"
+Formatting.toWords(42, "de"); // "zweiundvierzig"
+Formatting.toWords(42, "es"); // "cuarenta y dos"
+Formatting.toWords(42, "fr"); // "quarante-deux"
+Formatting.toWords(42, "ar"); // "اثنان وأربعون"
+Formatting.toWords(42, "bn"); // "বিয়াল্লিশ"
+Formatting.toWords(42, "mr"); // "बेचाळीस"
+Formatting.toWords(42, "gu"); // "બેતાળીસ"
+Formatting.toWords(42, "ta"); // "நாற்பத்திரண்டு"
 
----
+Formatting.toOrdinal(1, "en"); // "1st"
+Formatting.toOrdinal(3, "hi"); // "3वाँ"
 
-#### `Matrix.normFrobenius(m)` / `Matrix.norm(m)` → `number`
-
-Frobenius norm: $\|A\|_F = \sqrt{\sum_{i,j} a_{ij}^2}$. `norm` is an alias.
-
-```js
-Matrix.norm([[3,0],[4,0]]);   // 5
+// Indian scale
+Formatting.toWords(10000000, "en", "indian"); // "one crore"
+Formatting.toWords(10000000, "hi", "indian"); // "एक करोड़"
 ```
 
 ---
 
-#### `Matrix.normInf(m)` → `number`
+## TypeScript Support
 
-Infinity norm (maximum absolute row sum).
+NumWiz is written in TypeScript 5.x — types are bundled, no separate `@types/numwiz` needed.
 
----
+```ts
+import numwiz, {
+  NumWiz,
+  Arithmetic,
+  Matrix,
+  Statistics,
+  Financial,
+  type NumWizOptions,
+} from "numwiz";
+import type {
+  Matrix2D,
+  LUResult,
+  QRResult,
+  AmortizationEntry,
+} from "numwiz/types";
 
-#### `Matrix.norm1(m)` → `number`
-
-1-norm (maximum absolute column sum).
-
----
-
-#### `Matrix.rank(m)` → `number`
-
-Matrix rank computed via RREF.
-
-```js
-Matrix.rank([[1,2,3],[4,5,6],[7,8,9]]);   // 2
-Matrix.rank([[1,0],[0,1],[0,0]]);          // 2
+const m: Matrix2D = [
+  [1, 2],
+  [3, 4],
+];
+const { L, U, P }: LUResult = Matrix.lu(m);
+const schedule: AmortizationEntry[] = Financial.amortizationSchedule(
+  500000,
+  10,
+  12
+);
 ```
 
----
+Key exported types:
 
-#### `Matrix.sumAxis(m, axis)` → `number[]`
-
-Sums along a row or column axis, returning a flat array.
-
-| `axis` | Result |
-|--------|--------|
-| `'row'` | Sum each row → array of length `rows` |
-| `'col'` | Sum each column → array of length `cols` |
-
-```js
-Matrix.sumAxis([[1,2,3],[4,5,6]], 'row');   // [6, 15]
-Matrix.sumAxis([[1,2],[3,4]], 'col');        // [4, 6]
-```
+| Type                | Description                                    |
+| ------------------- | ---------------------------------------------- |
+| `Matrix2D`          | `number[][]`                                   |
+| `LUResult`          | `{ L: Matrix2D, U: Matrix2D, P: Matrix2D }`    |
+| `QRResult`          | `{ Q: Matrix2D, R: Matrix2D }`                 |
+| `EigenvalueResult`  | `number \| { real: number; imag: number }`     |
+| `AmortizationEntry` | `{ month, emi, principal, interest, balance }` |
+| `NumWizOptions`     | `{ safe?: boolean }`                           |
+| `WeightedItem<T>`   | `{ value: T, weight: number }`                 |
+| `LocaleData`        | Locale definition structure                    |
 
 ---
 
-### Row & Column Operations
+## Error Reference
+
+| Situation                           | Error type   | Examples                                           |
+| ----------------------------------- | ------------ | -------------------------------------------------- |
+| Invalid number input                | `TypeError`  | Non-number, NaN passed to strict method            |
+| Wrong matrix dimensions             | `RangeError` | Non-square for inverse, size mismatch for multiply |
+| Out-of-range index                  | `RangeError` | `Matrix.get(m, 99, 0)`                             |
+| Division by zero (scalar)           | `Error`      | `Arithmetic.divide(10, 0)`                         |
+| Division by zero (matrix)           | `Error`      | `Matrix.elementDivide(A, zeroMatrix)`              |
+| Singular matrix                     | `Error`      | `Matrix.inverse(singularMatrix)`                   |
+| Negative sqrt / log of non-positive | `RangeError` | `Arithmetic.sqrt(-1)` in non-safe mode             |
+| Inverse trig out-of-domain          | `RangeError` | `Trigonometry.asin(2)`                             |
+| Locale not registered               | `Error`      | Unknown locale code                                |
+| Linearly dependent columns (QR)     | `Error`      | `Matrix.qr` on rank-deficient matrix               |
+
+> Use [`numwiz.safe()`](#safe-mode) on the chainable API to convert runtime errors into `NaN` values instead of throws.
 
 ---
 
-#### `Matrix.swapRows(m, r1, r2)` / `Matrix.swapCols(m, c1, c2)`
+## License
 
-Returns a new matrix with two rows (or columns) swapped.  
-**Throws:** `RangeError` if index is out of range.
-
-```js
-Matrix.swapRows([[1,2],[3,4],[5,6]], 0, 2);
-// [[5,6],[3,4],[1,2]]
-```
-
----
-
-#### `Matrix.scaleRow(m, row, scalar)`
-
-Multiplies every element of `row` by `scalar`.
-
----
-
-#### `Matrix.addRowMultiple(m, target, source, scalar)`
-
-Row operation: `row[target] += scalar * row[source]`.
-
----
-
-#### `Matrix.ref(m)` → `number[][]`
-
-Row Echelon Form.
-
----
-
-#### `Matrix.rref(m)` → `number[][]`
-
-Reduced Row Echelon Form (full Gauss-Jordan elimination).
-
-```js
-Matrix.rref([[2,1,-1,8],[-3,-1,2,-11],[-2,1,2,-3]]);
-// [[1,0,0,2],[0,1,0,3],[0,0,1,-1]]
-```
-
----
-
-### Decomposition
-
----
-
-#### `Matrix.lu(m)` → `{ L, U, P }`
-
-LU decomposition with partial pivoting. Returns three plain `number[][]` arrays satisfying **PA = LU**.
-
-| Property | Type | Description |
-|----------|------|-------------|
-| `L` | `number[][]` | Lower triangular with 1s on diagonal |
-| `U` | `number[][]` | Upper triangular |
-| `P` | `number[][]` | Permutation matrix |
-
-**Throws:** `RangeError` if not square.
-
-```js
-const { L, U, P } = Matrix.lu([[2,1,1],[4,3,3],[8,7,9]]);
-// Verify: Matrix.multiply(P, A) ≈ Matrix.multiply(L, U)
-```
-
----
-
-#### `Matrix.qr(m)` → `{ Q, R }`
-
-QR decomposition via Gram-Schmidt orthogonalization. Returns two plain `number[][]` arrays satisfying **A = QR**.
-
-| Property | Type | Description |
-|----------|------|-------------|
-| `Q` | `number[][]` | Orthogonal matrix (rows ≥ cols) |
-| `R` | `number[][]` | Upper triangular matrix |
-
-**Throws:**
-- `RangeError` — if `rows < cols`
-- `Error` — if columns are linearly dependent
-
-```js
-const { Q, R } = Matrix.qr([[12,-51,4],[6,167,-68],[-4,24,-41]]);
-```
-
----
-
-#### `Matrix.eigenvalues(m)` → `number[]`
-
-Eigenvalues computed via QR iteration (for n ≥ 3) or direct formula (n = 1, 2). Returns real eigenvalues.
-
-**Throws:** `RangeError` if not square.
-
-```js
-Matrix.eigenvalues([[4,1],[2,3]]);   // [5, 2]
-```
-
----
-
-#### `Matrix.eigenvalues2x2(m)` → `number[] | {real, imag}[]`
-
-Dedicated 2×2 eigenvalue solver. Returns real numbers for real eigenvalues, or `{ real, imag }` objects for complex ones.
-
-**Throws:** `RangeError` if not 2×2.
-
-```js
-Matrix.eigenvalues2x2([[4,1],[2,3]]);
-// [5, 2]  — real
-
-Matrix.eigenvalues2x2([[0,-1],[1,0]]);
-// [{ real: 0, imag: 1 }, { real: 0, imag: -1 }]  — complex
-```
-
----
-
-### Solving Ax = b
-
----
-
-#### `Matrix.solve(A, b)` → `number[][]`
-
-Solves the linear system **Ax = b** via Gaussian elimination with partial pivoting.
-
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `A` | `number[][]` | n×n coefficient matrix |
-| `b` | `number[]` or `number[][]` | Right-hand side — flat array **or** n×1 column vector |
-
-**Returns:** n×1 column vector `[[x₁], [x₂], ..., [xₙ]]`  
-**Throws:**
-- `RangeError` — if `A` is not square or `b` has wrong length
-- `Error` — if `A` is singular
-
-```js
-// 2x + y = 5,  x + 3y = 10  →  x=1, y=3
-const x = Matrix.solve([[2,1],[1,3]], [5,10]);
-x[0][0];   // 1
-x[1][0];   // 3
-
-// Also accepts column vector b:
-Matrix.solve([[2,1],[1,3]], [[5],[10]]);
-```
-
----
-
-#### `Matrix.solveCramer(A, b)` → `number[][]`
-
-Solves **Ax = b** using [Cramer's rule](https://en.wikipedia.org/wiki/Cramer%27s_rule). Less numerically stable than Gaussian elimination; prefer `solve` for large systems.
-
-| Parameter | Type |
-|-----------|------|
-| `A` | `number[][]` — n×n |
-| `b` | `number[]` — flat array |
-
-**Returns:** n×1 column vector `[[x₁], [x₂], ..., [xₙ]]`  
-**Throws:** `Error` if singular.
-
-```js
-const x = Matrix.solveCramer([[2,1],[1,3]], [5,10]);
-x[0][0];   // 1
-x[1][0];   // 3
-```
-
----
-
-### Structure — Slice, Concat, Reshape
-
----
-
-#### `Matrix.slice(m, startRow, startCol, endRow, endCol)` → `number[][]`
-
-Extracts a sub-matrix. Row and column ranges are **[start, end)** (start inclusive, end exclusive).
-
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `startRow` | `number` | First row to include (inclusive) |
-| `startCol` | `number` | First column to include (inclusive) |
-| `endRow` | `number` | Row boundary (exclusive) |
-| `endCol` | `number` | Column boundary (exclusive) |
-
-**Throws:** `RangeError` on invalid range.
-
-```js
-const A = [[1,2,3],[4,5,6],[7,8,9]];
-
-Matrix.slice(A, 0, 1, 2, 3);    // rows [0,2), cols [1,3) → [[2,3],[5,6]]
-Matrix.slice(A, 0, 0, 2, 2);    // top-left 2×2 → [[1,2],[4,5]]
-```
-
----
-
-#### `Matrix.subMatrix(m, startRow, startCol, endRow, endCol)`
-
-Alias for `Matrix.slice` — identical parameter order and behaviour.
-
----
-
-#### `Matrix.hStack(a, b)` / `Matrix.hConcat(a, b)`
-
-Horizontally concatenates two matrices (they must have the same number of rows).  
-`hConcat` is an alias.
-
-```js
-Matrix.hStack([[1,2],[3,4]], [[5],[6]]);
-// [[1,2,5],[3,4,6]]
-```
-
----
-
-#### `Matrix.vStack(a, b)` / `Matrix.vConcat(a, b)`
-
-Vertically concatenates two matrices (they must have the same number of columns).  
-`vConcat` is an alias.
-
-```js
-Matrix.vStack([[1,2],[3,4]], [[5,6]]);
-// [[1,2],[3,4],[5,6]]
-```
-
----
-
-#### `Matrix.reshape(m, rows, cols)` → `number[][]`
-
-Re-interprets the elements of `m` (row-major order) into new dimensions.
-
-**Throws:** `RangeError` if total element count changes.
-
-```js
-Matrix.reshape([[1,2,3],[4,5,6]], 3, 2);
-// [[1,2],[3,4],[5,6]]
-```
-
----
-
-### Boolean Checks
-
-All boolean checks return `boolean` and tolerate floating-point noise at `1e-10` (unless otherwise noted).
-
----
-
-#### `Matrix.isSquare(m)` → `boolean`
-
-```js
-Matrix.isSquare([[1,2],[3,4]]);     // true
-Matrix.isSquare([[1,2,3],[4,5,6]]); // false
-```
-
----
-
-#### `Matrix.isIdentity(m)` → `boolean`
-
----
-
-#### `Matrix.isSymmetric(m)` → `boolean`
-
-True if square and `A[i][j] === A[j][i]` for all `i`, `j`.
-
----
-
-#### `Matrix.isDiagonal(m)` → `boolean`
-
-True if all off-diagonal elements are zero.
-
----
-
-#### `Matrix.isUpperTriangular(m)` / `Matrix.isLowerTriangular(m)` → `boolean`
-
----
-
-#### `Matrix.isOrthogonal(m, tolerance = 1e-8)` → `boolean`
-
-True if `A × Aᵀ ≈ I` within `tolerance`. The wider default (`1e-8`) accommodates floating-point accumulation after operations like QR decomposition.
-
-```js
-const { Q } = Matrix.qr([[12,-51,4],[6,167,-68],[-4,24,-41]]);
-Matrix.isOrthogonal(Matrix.round(Q, 10));   // true
-```
-
----
-
-#### `Matrix.isSingular(m)` → `boolean`
-
-True if `|det(m)| < 1e-10`.
-
----
-
-#### `Matrix.isZero(m)` → `boolean`
-
-True if all elements are effectively zero (`< 1e-10`).
-
----
-
-#### `Matrix.isVector(m)` → `boolean`
-
-True if matrix has exactly one row **or** one column.
-
----
-
-#### `Matrix.isRowVector(m)` / `Matrix.isColumnVector(m)` → `boolean`
-
----
-
-#### `Matrix.isSameShape(a, b)` → `boolean`
-
-True if `a` and `b` have identical dimensions.
-
----
-
-#### `Matrix.equals(a, b, tolerance = 1e-10)` / `Matrix.isEqual(a, b, tolerance = 1e-10)` → `boolean`
-
-Element-wise comparison within tolerance. `isEqual` is an alias for `equals`.
-
-```js
-Matrix.isEqual([[1.0001]], [[1]], 0.001);   // true
-Matrix.isEqual([[1,2],[3,4]], [[1,2],[3,4]]); // true
-```
-
----
-
-### Vector Operations
-
-These methods accept both flat `number[]` arrays and `number[][]` matrix representations.
-
----
-
-#### `Matrix.dot(a, b)` → `number`
-
-Dot product of two vectors.  
-**Throws:** `RangeError` if lengths differ.
-
-```js
-Matrix.dot([1,2,3], [4,5,6]);   // 32
-```
-
----
-
-#### `Matrix.cross(a, b)` → `number[]`
-
-Cross product of two 3D vectors (flat array result).  
-**Throws:** `RangeError` if either vector is not length 3.
-
-```js
-Matrix.cross([1,0,0], [0,1,0]);   // [0, 0, 1]
-```
-
----
-
-#### `Matrix.magnitude(v)` → `number`
-
-Euclidean magnitude (2-norm) of a vector.
-
----
-
-#### `Matrix.normalize(v)` → `number[]`
-
-Returns the unit vector of `v`.  
-**Throws:** `Error` if `v` is the zero vector.
-
----
-
-#### `Matrix.angleBetween(a, b)` → `number`
-
-Angle between two vectors in **radians**.
-
----
-
-### Aggregation by Row / Column
-
-These methods return matrices (not scalars) to preserve structure.
-
----
-
-#### `Matrix.rowSums(m)` → `number[][]`
-
-n×1 column vector of row sums.
-
-```js
-Matrix.rowSums([[1,2,3],[4,5,6]]);   // [[6],[15]]
-```
-
----
-
-#### `Matrix.colSums(m)` → `number[][]`
-
-1×n row vector of column sums.
-
-```js
-Matrix.colSums([[1,2],[3,4]]);   // [[4,6]]
-```
-
----
-
-#### `Matrix.rowMeans(m)` → `number[][]`
-
-n×1 column vector of row means.
-
----
-
-#### `Matrix.colMeans(m)` → `number[][]`
-
-1×n row vector of column means.
-
----
-
-### Functional / Element-wise
-
----
-
-#### `Matrix.map(m, fn)` → `number[][]`
-
-Applies `fn(value, rowIndex, colIndex)` to every element.
-
-```js
-Matrix.map([[1,2],[3,4]], (v, i, j) => v + i * 10);
-// [[1,2],[13,14]]
-```
-
----
-
-#### `Matrix.forEach(m, fn)`
-
-Iterates every element with `fn(value, rowIndex, colIndex)`. Returns `undefined`.
-
----
-
-#### `Matrix.every(m, fn)` → `boolean`
-
-Returns `true` if `fn` returns truthy for every element.
-
----
-
-#### `Matrix.some(m, fn)` → `boolean`
-
-Returns `true` if `fn` returns truthy for at least one element.
-
----
-
-#### `Matrix.round(m, decimals = 0)` → `number[][]`
-
-Rounds every element to `decimals` decimal places.
-
-```js
-Matrix.round([[1.556, 2.334]], 2);   // [[1.56, 2.33]]
-```
-
----
-
-#### `Matrix.abs(m)` → `number[][]`
-
-Absolute value of every element.
-
----
-
-### Display & Utility
-
----
-
-#### `Matrix.toString(m, decimals = 4)` → `string`
-
-Pretty-prints the matrix with bracket notation. Columns are right-aligned.
-
-```js
-console.log(Matrix.toString([[1.5, 2.3],[10, 0.001]]));
-// ┌  1.5000   2.3000 ┐
-// └ 10.0000   0.0010 ┘
-```
-
----
-
-#### `Matrix.print(m, decimals = 4)`
-
-Calls `console.log(Matrix.toString(m, decimals))`. Returns `undefined`.
-
----
-
-#### `Matrix.toHTML(m, className = 'matrix')` → `string`
-
-Returns an HTML `<table>` string representation.
-
----
-
-#### `Matrix.toJSON(m)` → `{ rows, cols, data }`
-
-Serializes to a plain object. Use `Matrix.fromJSON` to deserialize.
-
----
-
-## Instance (Chainable) API
-
-Create an instance with `new Matrix(data)`. All chainable methods return a new `Matrix` instance.  
-Call `.toArray()` at the end to retrieve the underlying `number[][]`.
-
-```js
-const m = new Matrix([[1,2],[3,4]]);
-```
-
-### Getters (non-chainable)
-
-| Method | Returns | Description |
-|--------|---------|-------------|
-| `getRows()` | `number` | Row count |
-| `getCols()` | `number` | Column count |
-| `getShape()` | `number[]` | `[rows, cols]` |
-| `getSize()` | `number` | Total elements |
-| `getElement(r, c)` | `number` | Element at position |
-
-### Terminal methods (produce a value, not a Matrix)
-
-| Method | Returns | Description |
-|--------|---------|-------------|
-| `toArray()` | `number[][]` | 2D deep copy of the data |
-| `flatten()` | `number[]` | 1D flat array |
-| `getDiagonal()` | `number[]` | Main diagonal |
-| `determinant()` | `number` | Matrix determinant |
-| `trace()` | `number` | Trace |
-| `sum()` | `number` | Sum of all elements |
-| `min()` | `number` | Minimum element |
-| `max()` | `number` | Maximum element |
-| `mean()` | `number` | Mean of all elements |
-| `rank()` | `number` | Rank |
-| `norm()` / `normFrobenius()` | `number` | Frobenius norm |
-| `eigenvalues()` | `number[]` | Eigenvalues |
-| `isSquare()` | `boolean` | Shape check |
-| `isIdentity()` | `boolean` | |
-| `isSymmetric()` | `boolean` | |
-| `isDiagonal()` | `boolean` | |
-| `isUpperTriangular()` | `boolean` | |
-| `isLowerTriangular()` | `boolean` | |
-| `isOrthogonal(tol?)` | `boolean` | Tolerance defaults to `1e-8` |
-| `isSingular()` | `boolean` | |
-| `isZero()` | `boolean` | |
-| `equals(other, tol?)` / `isEqual(other, tol?)` | `boolean` | |
-| `toString(decimals?)` | `string` | Pretty-print |
-| `lu()` | `{L,U,P}` | LU decomposition (plain arrays) |
-| `qr()` | `{Q,R}` | QR decomposition (plain arrays) |
-
-### Chainable methods (return a new `Matrix`)
-
-| Method | Description |
-|--------|-------------|
-| `add(other)` | Element-wise addition |
-| `subtract(other)` | Element-wise subtraction |
-| `multiply(other)` | Matrix multiplication |
-| `scale(scalar)` | Scalar multiplication |
-| `negate()` | Negate all elements |
-| `hadamard(other)` | Element-wise product |
-| `elementDivide(other)` | Element-wise division |
-| `elementPower(exp)` | Element-wise power |
-| `power(n)` | Matrix integer power |
-| `scalarAdd(s)` | Add constant to every element |
-| `scalarSubtract(s)` | Subtract constant from every element |
-| `transpose()` | Transpose |
-| `inverse()` | Matrix inverse (throws if singular) |
-| `adjugate()` | Adjugate |
-| `rref()` | Reduced Row Echelon Form |
-| `ref()` | Row Echelon Form |
-| `solve(b)` | Solve Ax=b — returns n×1 `Matrix` |
-| `hStack(other)` | Horizontal concatenation |
-| `vStack(other)` | Vertical concatenation |
-| `slice(startRow, startCol, endRow, endCol)` | Sub-matrix extraction |
-| `reshape(rows, cols)` | Reshape |
-| `swapRows(r1, r2)` | Swap two rows |
-| `swapCols(c1, c2)` | Swap two columns |
-| `map(fn)` | Element-wise transform |
-| `round(decimals?)` | Round elements |
-| `abs()` | Absolute value of elements |
-| `clone()` | Deep copy as new instance |
-| `print(decimals?)` | Print to console (returns `this` for chaining) |
-
-### Chain examples
-
-```js
-// Solve and extract first solution component
-const x = new Matrix([[2,1],[1,3]])
-  .solve([[5],[10]])
-  .toArray();
-x[0][0];   // 1
-x[1][0];   // 3
-
-// Compute inverse and verify A × A⁻¹ = I
-const isId = new Matrix([[4,7],[2,6]])
-  .inverse()
-  .multiply([[4,7],[2,6]])
-  .round(10)
-  .isIdentity();
-// true
-
-// Extract top-left 2×2 from a 3×3
-const sub = new Matrix([[1,2,3],[4,5,6],[7,8,9]])
-  .slice(0, 0, 2, 2)   // rows [0,2), cols [0,2)
-  .toArray();
-// [[1,2],[4,5]]
-
-// Transform and display
-new Matrix([[1.556, 2.334]])
-  .round(2)
-  .print();
-// [ 1.56  2.33 ]
-```
-
----
-
-## Quick Reference Table
-
-| Group | Key methods |
-|-------|-------------|
-| **Create** | `create`, `identity`, `zeros`, `ones`, `diagonal`, `random`, `fromFlat`, `fromArray`, `columnVector`, `rowVector`, `rotation2D`, `scaling`, `hilbert`, `vandermonde` |
-| **Inspect** | `shape`, `rows`, `cols`, `size`, `get`, `set`, `getRow`, `getCol`, `getDiagonal`, `clone`, `flatten`, `toArray` |
-| **Arithmetic** | `add`, `subtract`, `multiply`, `scale`, `negate`, `hadamard`, `elementDivide`, `elementPower`, `power` |
-| **Transform** | `transpose`, `inverse`, `adjugate`, `minor`, `cofactor`, `cofactorMatrix` |
-| **Reduction** | `determinant`, `trace`, `rank`, `sum`, `min`, `max`, `mean`, `norm`, `normFrobenius`, `normInf`, `norm1`, `sumAxis` |
-| **Row/col ops** | `swapRows`, `swapCols`, `scaleRow`, `addRowMultiple`, `ref`, `rref` |
-| **Decompose** | `lu`, `qr`, `eigenvalues`, `eigenvalues2x2` |
-| **Solve** | `solve`, `solveCramer` |
-| **Structure** | `slice`, `subMatrix`, `hStack`, `hConcat`, `vStack`, `vConcat`, `reshape` |
-| **Boolean** | `isSquare`, `isIdentity`, `isSymmetric`, `isDiagonal`, `isUpperTriangular`, `isLowerTriangular`, `isOrthogonal`, `isSingular`, `isZero`, `isVector`, `isRowVector`, `isColumnVector`, `isSameShape`, `equals`, `isEqual` |
-| **Vector** | `dot`, `cross`, `magnitude`, `normalize`, `angleBetween` |
-| **Aggregate** | `rowSums`, `colSums`, `rowMeans`, `colMeans` |
-| **Functional** | `map`, `forEach`, `every`, `some`, `round`, `abs` |
-| **Display** | `toString`, `print`, `toHTML`, `toJSON`, `fromJSON` |
+[MIT](./LICENSE) © 2026 Subroto Saha
