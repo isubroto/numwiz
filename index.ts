@@ -1,4 +1,3 @@
-import pkg from "./package.json";
 import Arithmetic from "./src/arithmetic";
 import Comparison from "./src/comparison";
 import Validation from "./src/validation";
@@ -397,7 +396,5 @@ export {
   NumberWords,
   Matrix,
 };
-
-export const VERSION: string = pkg.version;
 
 export default numwiz;
