@@ -1,3 +1,10 @@
+# [1.1.0](https://github.com/isubroto/numwiz/compare/v1.0.0...v1.1.0) (2026-03-04)
+
+
+### Features
+
+* export VERSION constant for programmatic version access ([a3c37cb](https://github.com/isubroto/numwiz/commit/a3c37cb546513abd05f4566b8e51d00df5911dda))
+
 # 1.0.0 (2026-03-04)
 
 
