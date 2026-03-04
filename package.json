@@ -1,6 +1,6 @@
 {
   "name": "numwiz",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "The ultimate number utility — arithmetic, formatting, currency (Lakh/Crore & Million/Billion), number-to-words in 10+ languages, statistics, financial math & more.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
