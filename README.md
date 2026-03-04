@@ -2,9 +2,12 @@
 
 > The ultimate number utility library for JavaScript & TypeScript — arithmetic, formatting, currency, number-to-words in 10 languages, statistics, financial math, matrix algebra, and much more.
 
-[![npm version](https://img.shields.io/npm/v/numwiz)](https://www.npmjs.com/package/numwiz)
-[![license](https://img.shields.io/npm/l/numwiz)](./LICENSE)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue)](https://www.typescriptlang.org/)
+[![npm version](https://img.shields.io/npm/v/numwiz.svg)](https://www.npmjs.com/package/numwiz)
+[![npm downloads](https://img.shields.io/npm/dm/numwiz.svg)](https://www.npmjs.com/package/numwiz)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue.svg)](https://www.typescriptlang.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Bundle Size](https://img.shields.io/bundlephobia/minzip/numwiz)](https://bundlephobia.com/package/numwiz)
+[![Build Status](https://img.shields.io/github/actions/workflow/status/isubroto/numwiz/publish.yml?branch=main)](https://github.com/isubroto/numwiz/actions)
 
 ---
 
