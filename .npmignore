@@ -1,0 +1,42 @@
+# Source files
+src/
+test/
+index.ts
+
+# Config
+tsconfig.json
+tsconfig*.json
+jest.config.*
+
+# Dev tooling
+.eslintrc*
+.prettierrc*
+.editorconfig
+
+# Docs & misc
+README.md
+MATRIX.md
+*.md
+test-errors.txt
+
+# Dependencies
+node_modules/
+
+# TypeScript cache
+*.tsbuildinfo
+
+# Coverage
+coverage/
+
+# Logs
+*.log
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Git
+.gitignore
+.github/

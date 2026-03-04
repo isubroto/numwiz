@@ -1,0 +1,659 @@
+
+> numwiz@1.0.0 test
+> jest --verbose
+
+FAIL test/index.test.js
+  ≡ƒö┤ Fix #1: Bitwise (was wrong class)
+    ΓêÜ AND (3 ms)
+    ΓêÜ OR (1 ms)
+    ΓêÜ XOR
+    ΓêÜ NOT
+    ΓêÜ leftShift
+    ΓêÜ rightShift
+    ΓêÜ getBit
+    ΓêÜ getBit 0 (1 ms)
+    ΓêÜ setBit
+    ΓêÜ clearBit (1 ms)
+    ΓêÜ toggleBit
+    ΓêÜ countBits
+    ΓêÜ isPowerOfTwo true
+    ΓêÜ isPowerOfTwo false
+    ΓêÜ nearestPowerOfTwo
+    ΓêÜ nextPowerOfTwo
+    ΓêÜ xorSwap (1 ms)
+    ΓêÜ toBinaryString (1 ms)
+    ΓêÜ throws on non-number (26 ms)
+  ≡ƒö┤ Fix #2: Trigonometry (was wrong class)
+    ΓêÜ sin(0) = 0
+    ΓêÜ cos(0) = 1 (1 ms)
+    ΓêÜ tan(0) = 0
+    ΓêÜ sin(╧Ç/2) Γëê 1
+    ΓêÜ asin(1) = ╧Ç/2 (1 ms)
+    ΓêÜ acos(1) = 0
+    ΓêÜ asin out of range throws (3 ms)
+    ΓêÜ sinh(0) = 0
+    ΓêÜ cosh(0) = 1
+    ΓêÜ sec(0) = 1
+    ΓêÜ toRadians(180) = ╧Ç
+    ΓêÜ toDegrees(╧Ç) = 180
+    ΓêÜ normalizeDegrees(370) = 10 (4 ms)
+    ΓêÜ hypot(3,4) = 5
+    ΓêÜ lawOfCosinesSide ΓÇö equilateral (1 ms)
+    ΓêÜ lawOfCosinesAngle
+    ΓêÜ log(1) = 0 (1 ms)
+    ΓêÜ log2(8) = 3
+    ΓêÜ log10(100) = 2
+    ΓêÜ logN(8,2) = 3
+    ΓêÜ log of negative throws
+  ≡ƒö┤ Fix #3: Arithmetic.subtract
+    ΓêÜ subtract(10, 3) = 7 (1 ms)
+    ΓêÜ subtract(10, 3, 2) = 5
+    ΓêÜ subtract(100, 20, 30, 10) = 40
+    ΓêÜ subtract single number returns itself
+    ΓêÜ subtract no args returns 0
+    ΓêÜ add still works
+    ΓêÜ divide by zero throws (2 ms)
+    ΓêÜ sqrt of negative throws (1 ms)
+    ΓêÜ non-number input throws
+  ≡ƒö┤ Fix #4: Advanced.eulerTotient (was mutating n)
+    ΓêÜ ╧å(1) = 1
+    ΓêÜ ╧å(10) = 4 (1 ms)
+    ΓêÜ ╧å(12) = 4
+    ΓêÜ ╧å(7) = 6 (prime)
+    ΓêÜ ╧å(36) = 12
+    ΓêÜ ╧å(100) = 40
+    ΓêÜ throws on 0 (3 ms)
+    ΓêÜ throws on negative (1 ms)
+  ≡ƒö┤ Fix #5: Chain NaN propagation & safe mode
+    ΓêÜ invalid input throws by default (4 ms)
+    ΓêÜ divide by zero throws by default
+    ΓêÜ sqrt(-1) throws by default (1 ms)
+    ΓêÜ safe mode: invalid input ΓåÆ NaN
+    ΓêÜ safe mode: divide by zero ΓåÆ NaN (1 ms)
+    ΓêÜ safe mode: NaN propagates through chain
+    ΓêÜ safe mode: isValid() returns false for NaN
+    ΓêÜ safe mode: isValid() returns true for good chain (1 ms)
+    ΓêÜ normal chain still works
+  ≡ƒƒá Fix #6: conversion.hoursToDays (was hoursTodays)
+    ΓêÜ hoursToDays(48) = 2
+    ΓêÜ deprecated hoursTodays still works (1 ms)
+    ΓêÜ other conversions work (1 ms)
+  ≡ƒƒá Fix #7: toPercentage consistency
+    ΓêÜ Formatting.toPercentage ΓÇö value IS the percentage (1 ms)
+    ΓêÜ Formatting.ratioToPercentage ΓÇö value is 0-1 ratio
+    ΓêÜ numwiz().toPercentage ΓÇö value IS the percentage
+    ΓêÜ numwiz().ratioToPercentage ΓÇö value is 0-1 ratio (1 ms)
+    ΓêÜ Formatting.fromPercentage
+  ≡ƒƒá Fix #9: Statistics edge cases
+    ΓêÜ sampleVariance throws on single element (3 ms)
+    ΓêÜ sampleVariance throws on empty array (1 ms)
+    ΓêÜ sampleVariance works with 2+ elements
+    ΓêÜ sampleStdDev throws on single element
+    ΓêÜ skewness throws on < 3 elements
+    ΓêÜ correlation throws on mismatched lengths (1 ms)
+    ΓêÜ correlation works (1 ms)
+    ΓêÜ zScore throws when stdDev is 0
+    ΓêÜ zScore works normally
+  ≡ƒƒá Fix #10: French number-words (100-scale spacing)
+    ΓêÜ French: 100 = 'cent' (not 'uncent') (1 ms)
+    ΓêÜ English: 100 = 'one hundred' (with space)
+    ΓêÜ German: 100 = 'einhundert' (no space)
+    ΓêÜ English: 200 = 'two hundred'
+    ΓêÜ German: 200 = 'zweihundert'
+    ΓêÜ German: 21 = 'einundzwanzig' (not 'einsundzwanzig') (1 ms)
+    ΓêÜ German: 1 (standalone) = 'eins'
+    ΓêÜ German: 1000 = 'eintausend'
+  ≡ƒƒí Fix #11-12: New Locales (mr, gu, ta)
+    ΓêÜ Marathi: 42 = αñ¼αÑçαñÜαñ╛αñ│αÑÇαñ╕
+    ΓêÜ Marathi: 100000 contains αñ▓αñ╛αñû (1 ms)
+    ΓêÜ Marathi: ordinal 5 = 5αñ╡αñ╛
+    ΓêÜ Gujarati: 25 = α¬¬α¬Üα½ìα¬Üα½Çα¬╕
+    ΓêÜ Gujarati: 10000000 contains α¬òα¬░α½ïα¬í (1 ms)
+    ΓêÜ Tamil: 5 = α«Éα«¿α»ìα«ñα»ü
+    ΓêÜ Tamil: 100000 contains α«▓α«ƒα»ìα«Üα««α»ì
+    ΓêÜ All 10 locales are registered (1 ms)
+  Number to Words
+    ΓêÜ English: 0
+    ΓêÜ English: 42
+    ΓêÜ English Western: million (1 ms)
+    ΓêÜ English Western: billion
+    ΓêÜ English Indian: lakh
+    ΓêÜ English Indian: crore
+    ΓêÜ English Indian: arab
+    ΓêÜ Hindi: 42 = αñ¼αñ»αñ╛αñ▓αÑÇαñ╕ (1 ms)
+    ΓêÜ Hindi: lakh
+    ΓêÜ Hindi: crore
+    ΓêÜ Spanish: 42
+    ΓêÜ Bengali: 25 = αª¬αªüαªÜαª┐αª╢
+    ΓêÜ Negative number (1 ms)
+    ΓêÜ Decimal number
+  Currency
+    ΓêÜ Western format: USD (18 ms)
+    ΓêÜ Indian format: INR (1 ms)
+    ΓêÜ Western abbreviation M
+    ΓêÜ Western abbreviation B
+    ΓêÜ Indian abbreviation L (1 ms)
+    ΓêÜ Indian abbreviation Cr
+    ΓêÜ Currency to words (Western) (1 ms)
+    ΓêÜ Currency to words (Indian English)
+    ΓêÜ Currency to words (Hindi) (1 ms)
+    ΓêÜ getSymbol
+  Chainable NumWiz
+    ΓêÜ Arithmetic chain
+    ΓêÜ Locale: Hindi
+    ΓêÜ System: Indian
+    ΓêÜ Currency Indian format
+    ΓêÜ Abbreviate Western (1 ms)
+    ΓêÜ Ordinal English
+    ΓêÜ Ordinal Hindi
+    ΓêÜ Roman numerals
+    ΓêÜ Commas (1 ms)
+    ΓêÜ Indian Commas
+  Financial
+    ΓêÜ Simple Interest
+    ΓêÜ EMI (1 ms)
+    ΓêÜ CAGR
+    ΓêÜ Discount
+    ΓêÜ ROI (1 ms)
+    ΓêÜ Tax
+    ΓêÜ Price with tax
+    ΓêÜ Amortization schedule length (2 ms)
+  Statistics
+    ΓêÜ sum
+    ΓêÜ mean (1 ms)
+    ΓêÜ median
+    ΓêÜ mode
+    ΓêÜ min
+    ΓêÜ max (1 ms)
+    ΓêÜ range
+    ΓêÜ stdDev
+    ΓêÜ quartiles
+    ΓêÜ percentile 50 = median (1 ms)
+    ΓêÜ frequency
+    ΓêÜ geometricMean
+    ΓêÜ harmonicMean
+    ΓêÜ weightedMean
+  Advanced
+    ΓêÜ factorial 0
+    ΓêÜ factorial 5
+    ΓêÜ factorial negative throws
+    ΓêÜ factorial float throws (1 ms)
+    ΓêÜ gcd
+    ΓêÜ lcm (1 ms)
+    ΓêÜ gcdArray
+    ΓêÜ lcmArray
+    ΓêÜ fibonacci
+    ΓêÜ fibonacciSequence (1 ms)
+    ΓêÜ primeFactors
+    ΓêÜ divisors
+    ΓêÜ collatz (1 ms)
+    ΓêÜ digitalRoot
+    ΓêÜ pascal row 4
+    ΓêÜ reverseNumber
+    ΓêÜ reverseNumber negative (1 ms)
+    ΓêÜ digitSum
+    ΓêÜ countDigits
+    ΓêÜ isPalindrome
+    ΓêÜ lerp
+    ΓêÜ percentChange (1 ms)
+    ΓêÜ catalan
+  Validation
+    ΓêÜ isNumber
+    ΓêÜ isEven/isOdd (2 ms)
+    ΓêÜ isPrime (1 ms)
+    ΓêÜ isArmstrong
+    ΓêÜ isPalindrome
+    ΓêÜ isPerfectNumber
+    ΓêÜ isHarshad (1 ms)
+    ΓêÜ isPowerOfTwo
+    ΓêÜ isPerfectSquare
+    ΓêÜ isPerfectCube (1 ms)
+    ΓêÜ isInRange
+    ΓêÜ isAbundant (1 ms)
+    ΓêÜ isDeficient
+  Sequences
+    ΓêÜ fibonacci
+    ΓêÜ primes (1 ms)
+    ΓêÜ triangular
+    ΓêÜ geometric
+    ΓêÜ arithmetic (1 ms)
+    ΓêÜ square
+    ΓêÜ cube
+    ΓêÜ lucas
+    ΓêÜ custom (1 ms)
+  Formatting extras
+    ΓêÜ toRoman
+    ΓêÜ fromRoman
+    ΓêÜ toFraction (1 ms)
+    ΓêÜ toScientific
+    ΓêÜ abbreviate
+    ΓêÜ abbreviateIndian (1 ms)
+    ΓêÜ addCommas
+    ΓêÜ addIndianCommas
+    ΓêÜ bankersRound
+    ΓêÜ padStart (1 ms)
+  Comparison
+    ΓêÜ isEqual
+    ΓêÜ isAlmostEqual
+    ΓêÜ clamp
+    ΓêÜ sign
+    ΓêÜ max (1 ms)
+    ΓêÜ min
+  Range
+    ΓêÜ create
+    ΓêÜ create step
+    ΓêÜ includes (1 ms)
+    ΓêÜ wrap
+    ΓêÜ chunk
+  Random (smoke tests)
+    ΓêÜ intBetween in range (9 ms)
+    ΓêÜ float in [0, 1) (8 ms)
+    ΓêÜ boolean returns boolean (1 ms)
+    ΓêÜ pick from array
+    ΓêÜ shuffle preserves elements
+    ΓêÜ generateList length
+    ΓêÜ uniqueList has unique values
+    ΓêÜ dice in range (4 ms)
+    ΓêÜ uuid format
+  Matrix ΓÇö Creation
+    ΓêÜ create fills with zeros
+    ΓêÜ create with fill value
+    ΓêÜ identity 3x3 (1 ms)
+    ΓêÜ diagonal
+    ΓêÜ fromArray
+    ΓêÜ fromArray throws on size mismatch (16 ms)
+    ├ù toArray (3 ms)
+    ΓêÜ invalid input throws (1 ms)
+  Matrix ΓÇö Inspection
+    ΓêÜ shape
+    ΓêÜ rows
+    ΓêÜ cols (1 ms)
+    ΓêÜ isSquare true
+    ΓêÜ isSquare false
+    ΓêÜ isSameShape true
+    ΓêÜ isSameShape false
+    ΓêÜ isSymmetric (1 ms)
+    ΓêÜ get
+    ΓêÜ getRow
+    ΓêÜ getCol
+    ΓêÜ set (immutable)
+    ΓêÜ isEqual exact
+    ΓêÜ isEqual with epsilon
+  Matrix ΓÇö Arithmetic
+    ΓêÜ add
+    ΓêÜ subtract
+    ΓêÜ scale
+    ΓêÜ negate (1 ms)
+    ΓêÜ hadamard (1 ms)
+    ΓêÜ add shape mismatch throws
+    ΓêÜ map
+    ΓêÜ round
+    ΓêÜ abs (1 ms)
+  Matrix ΓÇö Multiplication
+    ΓêÜ multiply 2x2
+    ΓêÜ multiply 2x3 ├ù 3x2
+    ΓêÜ multiply incompatible shapes throws (1 ms)
+    ΓêÜ power A^0 = identity
+    ΓêÜ power A^1 = A
+    ΓêÜ power A^2
+  Matrix ΓÇö Transformations
+    ΓêÜ transpose square
+    ΓêÜ transpose rectangular
+    ΓêÜ clone does not share reference (1 ms)
+  Matrix ΓÇö Reduction
+    ΓêÜ sum
+    ΓêÜ min
+    ΓêÜ max
+    ΓêÜ mean
+    ΓêÜ trace
+    ΓêÜ norm (Frobenius)
+    ΓêÜ sumAxis rows
+    ΓêÜ sumAxis cols
+    ΓêÜ trace non-square throws (1 ms)
+  Matrix ΓÇö Linear Algebra
+    ΓêÜ determinant 1x1
+    ΓêÜ determinant 2x2
+    ΓêÜ determinant 3x3
+    ΓêÜ determinant 3x3 non-singular
+    ΓêÜ inverse 2x2
+    ├ù inverse singular returns null (1 ms)
+    ΓêÜ rank full rank 3x3
+    ΓêÜ rank rank-deficient (1 ms)
+    ├ù solve linear system
+    ├ù solve singular returns null
+    ΓêÜ LU decomposition P┬╖A = L┬╖U
+    ΓêÜ RREF identity unchanged (1 ms)
+    ΓêÜ RREF reduces correctly
+    ΓêÜ eigenvalues2x2 real
+    ΓêÜ eigenvalues2x2 complex (1 ms)
+  Matrix ΓÇö Structure
+    ΓêÜ hStack
+    ΓêÜ vStack
+    ├ù slice (2 ms)
+    ΓêÜ swapRows
+    ΓêÜ swapCols
+    ΓêÜ hStack row mismatch throws
+  Matrix ΓÇö Display
+    ΓêÜ toString returns string
+
+  ΓùÅ Matrix ΓÇö Creation ΓÇ║ toArray
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 0
+    + Received  + 4
+
+      Array [
+    +   Array [
+          1,
+          2,
+    +   ],
+    +   Array [
+          3,
+          4,
+    +   ],
+      ]
+
+      816 |     });
+      817 |     test("toArray", () => {
+    > 818 |         expect(Matrix.toArray([[1, 2], [3, 4]])).toEqual([1, 2, 3, 4]);
+          |                                                  ^
+      819 |     });
+      820 |     test("invalid input throws", () => {
+      821 |         expect(() => Matrix.create(-1, 2)).toThrow(RangeError);
+
+      at Object.toEqual (test/index.test.js:818:50)
+
+  ΓùÅ Matrix ΓÇö Linear Algebra ΓÇ║ inverse singular returns null
+
+    Matrix is singular (det Γëê 0), inverse does not exist
+
+      597 |
+      598 |         if (Math.abs(det) < 1e-12) {
+    > 599 |             throw new Error("Matrix is singular (det Γëê 0), inverse does not exist");
+          |                   ^
+      600 |         }
+      601 |
+      602 |         // Augment [A | I]
+
+      at Function.inverse (src/matrix.js:599:19)
+      at Object.inverse (test/index.test.js:980:23)
+
+  ΓùÅ Matrix ΓÇö Linear Algebra ΓÇ║ solve linear system
+
+    expect(received).toBeCloseTo(expected)
+
+    Matcher error: received value must be a number
+
+    Received has type:  array
+    Received has value: [1]
+
+      993 |         const b = [8, -1];
+      994 |         const x = Matrix.solve(A, b);
+    > 995 |         expect(x[0]).toBeCloseTo(1);
+          |                      ^
+      996 |         expect(x[1]).toBeCloseTo(2);
+      997 |     });
+      998 |     test("solve singular returns null", () => {
+
+      at Object.toBeCloseTo (test/index.test.js:995:22)
+
+  ΓùÅ Matrix ΓÇö Linear Algebra ΓÇ║ solve singular returns null
+
+    System has no unique solution (singular matrix)
+
+      1095 |
+      1096 |             if (Math.abs(aug[ col ][ col ]) < 1e-12) {
+    > 1097 |                 throw new Error("System has no unique solution (singular matrix)");
+           |                       ^
+      1098 |             }
+      1099 |
+      1100 |             const pivot = aug[ col ][ col ];
+
+      at Function.solve (src/matrix.js:1097:23)
+      at Object.solve (test/index.test.js:999:23)
+
+  ΓùÅ Matrix ΓÇö Structure ΓÇ║ slice
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 5
+    + Received  + 0
+
+      Array [
+        Array [
+    -     2,
+          3,
+    -   ],
+    -   Array [
+    -     5,
+    -     6,
+        ],
+      ]
+
+      1049 |     test("slice", () => {
+      1050 |         const A = [[1, 2, 3], [4, 5, 6], [7, 8, 9]];
+    > 1051 |         expect(Matrix.slice(A, 0, 2, 1, 3)).toEqual([[2, 3], [5, 6]]);
+           |                                             ^
+      1052 |     });
+      1053 |     test("swapRows", () => {
+      1054 |         const A = [[1, 2], [3, 4]];
+
+      at Object.toEqual (test/index.test.js:1051:45)
+
+FAIL test/matrix.test.js
+  Matrix Creation
+    ΓêÜ create returns plain array (1 ms)
+    ΓêÜ create with fill value (1 ms)
+    ΓêÜ create invalid dims throws RangeError (38 ms)
+    ΓêÜ identity returns plain array (1 ms)
+    ΓêÜ zeros
+    ΓêÜ ones (1 ms)
+    ΓêÜ fill
+    ΓêÜ diagonal
+    ΓêÜ fromFlat
+    ΓêÜ fromFlat size mismatch throws RangeError (1 ms)
+    ΓêÜ fromArray validates and returns copy (1 ms)
+    ΓêÜ fromArray invalid input throws TypeError (2 ms)
+    ΓêÜ columnVector (1 ms)
+    ΓêÜ rowVector
+    ΓêÜ random (7 ms)
+    ΓêÜ rotation2D
+    ΓêÜ scaling
+    ΓêÜ hilbert (1 ms)
+    ΓêÜ vandermonde
+  Matrix Inspection
+    ΓêÜ shape
+    ΓêÜ rows (1 ms)
+    ΓêÜ cols
+    ΓêÜ size
+    ΓêÜ get
+    ΓêÜ get out of range throws RangeError (1 ms)
+    ΓêÜ set returns new array
+    ΓêÜ getRow
+    ΓêÜ getCol (1 ms)
+    ΓêÜ getDiagonal
+    ΓêÜ toArray deep copies
+    ΓêÜ clone deep copies (1 ms)
+  Matrix Arithmetic
+    ΓêÜ add returns plain array
+    ΓêÜ add size mismatch throws RangeError (1 ms)
+    ΓêÜ subtract
+    ΓêÜ multiply
+    ΓêÜ multiply dimension mismatch throws RangeError (1 ms)
+    ΓêÜ scale
+    ΓêÜ scalarMultiply (alias)
+    ΓêÜ scalarDivide
+    ΓêÜ scalarDivide by zero throws (1 ms)
+    ΓêÜ scalarAdd
+    ΓêÜ scalarSubtract
+    ΓêÜ negate (1 ms)
+    ΓêÜ hadamard
+    ΓêÜ elementDivide (1 ms)
+    ΓêÜ elementDivide by zero throws
+    ΓêÜ elementPower
+    ΓêÜ power
+    ΓêÜ power(0) = identity (1 ms)
+    ΓêÜ power non-square throws RangeError
+    ΓêÜ power negative throws RangeError (1 ms)
+  Matrix Transformations
+    ΓêÜ transpose
+    ΓêÜ transpose of transpose = original
+    ΓêÜ inverse 2├ù2 (1 ms)
+    ΓêÜ inverse 3├ù3
+    ΓêÜ inverse singular throws Error (1 ms)
+    ΓêÜ inverse non-square throws RangeError (1 ms)
+    ΓêÜ minor
+    ΓêÜ cofactor (1 ms)
+    ΓêÜ adjugate identity: A ├ù adj(A) = det(A) ├ù I
+  Scalar Properties
+    ΓêÜ determinant 1├ù1
+    ΓêÜ determinant 2├ù2 (1 ms)
+    ΓêÜ determinant 3├ù3
+    ΓêÜ determinant 4├ù4
+    ΓêÜ determinant identity = 1
+    ΓêÜ determinant singular = 0
+    ΓêÜ determinant non-square throws RangeError
+    ΓêÜ trace
+    ΓêÜ trace non-square throws RangeError
+    ΓêÜ sum
+    ΓêÜ min
+    ΓêÜ max (4 ms)
+    ΓêÜ mean (1 ms)
+    ΓêÜ normFrobenius
+    ΓêÜ rank full
+    ΓêÜ rank deficient (1 ms)
+    ΓêÜ rank rectangular
+  Row & Column Operations
+    ΓêÜ swapRows
+    ΓêÜ swapRows out of range throws RangeError (1 ms)
+    ΓêÜ swapCols
+    ΓêÜ swapCols out of range throws RangeError (1 ms)
+    ΓêÜ scaleRow
+    ΓêÜ addRowMultiple
+    ΓêÜ ref
+    ΓêÜ rref of full rank = identity
+  Decomposition
+    ΓêÜ LU: PA = LU, returns plain arrays (1 ms)
+    ΓêÜ QR: A = QR, returns plain arrays (1 ms)
+    ΓêÜ eigenvalues 2├ù2 (1 ms)
+    ΓêÜ eigenvalues diagonal (1 ms)
+  Solving Ax = b
+    ΓêÜ solve 2├ù2 returns plain array
+    ΓêÜ solve accepts flat b array
+    ΓêÜ solve 3├ù3
+    ΓêÜ solve singular throws Error
+    ├ù solveCramer returns flat array
+  Structure Operations
+    ΓêÜ hStack
+    ΓêÜ hStack row mismatch throws RangeError (1 ms)
+    ΓêÜ hConcat (alias)
+    ΓêÜ vStack
+    ΓêÜ vStack col mismatch throws RangeError (1 ms)
+    ΓêÜ vConcat (alias)
+    ΓêÜ slice
+    ΓêÜ slice invalid range throws RangeError (1 ms)
+    ΓêÜ subMatrix (alias)
+    ΓêÜ reshape
+    ΓêÜ reshape size mismatch throws RangeError
+    ΓêÜ flatten
+  Boolean Checks
+    ΓêÜ isSquare (1 ms)
+    ΓêÜ isIdentity
+    ΓêÜ isSymmetric
+    ΓêÜ isDiagonal (1 ms)
+    ΓêÜ isUpperTriangular
+    ΓêÜ isLowerTriangular (1 ms)
+    ΓêÜ isOrthogonal
+    ΓêÜ isSingular
+    ΓêÜ isZero
+    ΓêÜ isVector (1 ms)
+    ΓêÜ isRowVector
+    ΓêÜ isColumnVector
+    ΓêÜ equals (1 ms)
+  Vector Operations
+    ΓêÜ dot product flat arrays
+    ΓêÜ dot product 2D arrays
+    ΓêÜ dot length mismatch throws RangeError
+    ΓêÜ cross product (1 ms)
+    ΓêÜ cross non-3D throws RangeError
+    ΓêÜ magnitude (1 ms)
+    ΓêÜ normalize
+    ΓêÜ normalize zero throws (1 ms)
+    ΓêÜ angleBetween
+  Aggregation
+    ΓêÜ rowSums (1 ms)
+    ΓêÜ colSums
+    ΓêÜ rowMeans (1 ms)
+    ΓêÜ colMeans
+  Functional Operations
+    ΓêÜ map
+    ΓêÜ map with indices (1 ms)
+    ΓêÜ forEach
+    ΓêÜ every
+    ΓêÜ some (1 ms)
+    ΓêÜ round
+    ΓêÜ abs
+  Display & Utility
+    ΓêÜ toString (1 ms)
+    ΓêÜ toHTML
+    ΓêÜ toJSON / fromJSON roundtrip (1 ms)
+  Instance (Chainable) API
+    ΓêÜ toArray returns plain array
+    ΓêÜ chain arithmetic ΓåÆ toArray
+    ΓêÜ chain transform ΓåÆ toArray
+    ΓêÜ chain ΓåÆ terminal scalar
+    ΓêÜ chain ΓåÆ terminal boolean
+    ΓêÜ chain structure ops (1 ms)
+    ΓêÜ chain swapRows
+    ΓêÜ chain swapCols
+    ΓêÜ chain slice (2 ms)
+    ΓêÜ chain solve (1 ms)
+    ΓêÜ chain decomposition returns plain arrays
+    ΓêÜ getShape, getRows, getCols, getSize (1 ms)
+    ΓêÜ getElement
+    ΓêÜ equals on instances
+  Mathematical Properties
+    ΓêÜ A ├ù I = A (1 ms)
+    ΓêÜ A ├ù AΓü╗┬╣ = I
+    ΓêÜ det(A) = det(Aß╡Ç)
+    ΓêÜ det(AB) = det(A) ├ù det(B)
+    ΓêÜ (AB)ß╡Ç = Bß╡ÇAß╡Ç
+    ΓêÜ 1├ù1 matrix (1 ms)
+    ΓêÜ immutability ΓÇö static ops don't modify input
+  Error Types
+    ΓêÜ invalid input ΓåÆ TypeError (1 ms)
+    ΓêÜ invalid dimensions ΓåÆ RangeError (2 ms)
+    ΓêÜ out of range index ΓåÆ RangeError (1 ms)
+    ΓêÜ non-square operation ΓåÆ RangeError (2 ms)
+    ΓêÜ size mismatch ΓåÆ RangeError (2 ms)
+    ΓêÜ singular matrix ΓåÆ Error (not RangeError) (1 ms)
+    ΓêÜ scale with non-number ΓåÆ TypeError
+    ΓêÜ set with NaN ΓåÆ TypeError (1 ms)
+    ΓêÜ cross product not 3D ΓåÆ RangeError
+    ΓêÜ dot product length mismatch ΓåÆ RangeError (1 ms)
+
+  ΓùÅ Solving Ax = b ΓÇ║ solveCramer returns flat array
+
+    expect(received).toBeCloseTo(expected)
+
+    Matcher error: received value must be a number
+
+    Received has type:  array
+    Received has value: [1]
+
+      490 |         const x = Matrix.solveCramer([[2, 1], [1, 3]], [5, 10]);
+      491 |         expect(Array.isArray(x)).toBe(true);
+    > 492 |         expect(x[0]).toBeCloseTo(1);
+          |                      ^
+      493 |         expect(x[1]).toBeCloseTo(3);
+      494 |     });
+      495 | });
+
+      at Object.toBeCloseTo (test/matrix.test.js:492:22)
+
+Test Suites: 2 failed, 2 total
+Tests:       6 failed, 468 passed, 474 total
+Snapshots:   0 total
+Time:        1.097 s
+Ran all test suites.
