@@ -1,3 +1,10 @@
+## [1.1.1](https://github.com/isubroto/numwiz/compare/v1.1.0...v1.1.1) (2026-03-04)
+
+
+### Bug Fixes
+
+* update badge links and improve README formatting ([7119d03](https://github.com/isubroto/numwiz/commit/7119d03c0a06a7af17ae0221b222172193f2cdd2))
+
 # [1.1.0](https://github.com/isubroto/numwiz/compare/v1.0.0...v1.1.0) (2026-03-04)
 
 
