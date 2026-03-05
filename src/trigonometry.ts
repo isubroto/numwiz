@@ -3,6 +3,29 @@
  */
 class Trigonometry {
   // =====================
+  // Mathematical Constants
+  // =====================
+
+  /** π ≈ 3.14159265358979 */
+  static readonly PI: number = Math.PI;
+  /** Euler's number e ≈ 2.71828182845905 */
+  static readonly E: number = Math.E;
+  /** τ = 2π ≈ 6.28318530717959 */
+  static readonly TAU: number = 2 * Math.PI;
+  /** Golden ratio φ ≈ 1.61803398874989 */
+  static readonly PHI: number = (1 + Math.sqrt(5)) / 2;
+  /** √2 ≈ 1.41421356237310 */
+  static readonly SQRT2: number = Math.SQRT2;
+  /** ln(2) ≈ 0.69314718055995 */
+  static readonly LN2: number = Math.LN2;
+  /** ln(10) ≈ 2.30258509299405 */
+  static readonly LN10: number = Math.LN10;
+  /** log₂(e) ≈ 1.44269504088896 */
+  static readonly LOG2E: number = Math.LOG2E;
+  /** log₁₀(e) ≈ 0.43429448190325 */
+  static readonly LOG10E: number = Math.LOG10E;
+
+  // =====================
   // Basic Trig
   // =====================
 

@@ -14,6 +14,14 @@ import Range from "./src/range";
 import Sequences from "./src/sequences";
 import NumberWords from "./src/number-words";
 import Matrix from "./src/matrix";
+import NDArray from "./src/ndarray";
+import LinAlg from "./src/linalg";
+import PolyModule, { Polynomial } from "./src/polynomial";
+import Calculus from "./src/calculus";
+import FFT from "./src/fft";
+import Interpolation, { CubicSpline } from "./src/interpolation";
+import Signal from "./src/signal";
+import BigPrecision, { RoundingMode } from "./src/precision";
 
 // ======================================
 // CHAINABLE WRAPPER
@@ -395,6 +403,19 @@ export {
   Sequences,
   NumberWords,
   Matrix,
+  // Scientific computing modules
+  NDArray,
+  LinAlg,
+  PolyModule,
+  Polynomial,
+  Calculus,
+  FFT,
+  Interpolation,
+  CubicSpline,
+  Signal,
+  // Arbitrary precision
+  BigPrecision,
+  RoundingMode,
 };
 
 export default numwiz;

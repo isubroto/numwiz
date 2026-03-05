@@ -1,6 +1,6 @@
 # NumWiz
 
-> The ultimate number utility library for JavaScript & TypeScript — arithmetic, formatting, currency, number-to-words in 10 languages, statistics, financial math, matrix algebra, and much more.
+> The ultimate number utility library for JavaScript & TypeScript — arithmetic, formatting, currency, number-to-words in 10 languages, statistics, financial math, matrix algebra, scientific computing (NDArray, LinAlg, FFT, Calculus, Polynomial, Interpolation, Signal), and arbitrary-precision decimals.
 
 [![npm version](https://img.shields.io/npm/v/numwiz.svg)](https://www.npmjs.com/package/numwiz)
 [![npm downloads](https://img.shields.io/npm/dm/numwiz.svg)](https://www.npmjs.com/package/numwiz)
@@ -38,6 +38,14 @@
    - [Currency](#currency)
    - [NumberWords](#numberwords)
    - [Matrix](#matrix)
+   - [NDArray](#ndarray)
+   - [LinAlg](#linalg)
+   - [Polynomial](#polynomial)
+   - [Calculus](#calculus)
+   - [FFT](#fft)
+   - [Interpolation](#interpolation)
+   - [Signal](#signal)
+   - [BigPrecision](#bigprecision)
 6. [Subpath Imports](#subpath-imports)
 7. [Supported Locales](#supported-locales)
 8. [TypeScript Support](#typescript-support)
@@ -71,6 +79,48 @@ Matrix.determinant([
   [1, 2],
   [3, 4],
 ]); // -2
+
+// Scientific computing — NDArray (numpy-style)
+import { NDArray } from "numwiz";
+const a = NDArray.arange(0, 6).reshape([2, 3]);
+a.shape; // [2, 3]
+NDArray.linspace(0, 1, 5).toArray(); // [0, 0.25, 0.5, 0.75, 1]
+const m = NDArray.from([
+  [1, 2],
+  [3, 4],
+]);
+m.dot(m).toArray(); // [[7,10],[15,22]]
+
+// Scientific computing — Linear Algebra
+import { LinAlg } from "numwiz";
+LinAlg.det([
+  [1, 2],
+  [3, 4],
+]); // -2
+LinAlg.inv([
+  [1, 2],
+  [3, 4],
+]); // [[-2, 1], [1.5, -0.5]]
+const { values, vectors } = LinAlg.eig([
+  [2, 1],
+  [1, 2],
+]);
+
+// Scientific computing — FFT
+import { FFT } from "numwiz";
+const spectrum = FFT.fft([1, 0, -1, 0]);
+FFT.powerSpectrum([1, 2, 3, 4]).toArray();
+
+// Scientific computing — Calculus
+import { Calculus } from "numwiz";
+Calculus.derivative((x) => x ** 3, 2); // ≈12
+Calculus.integrate((x) => x ** 2, 0, 3); // ≈9 (Simpson)
+
+// Arbitrary precision decimals
+import { BigPrecision } from "numwiz";
+new BigPrecision("0.1").add("0.2").toString(); // "0.3" (exact)
+BigPrecision.setPrecision(50);
+BigPrecision.pi().toString(); // 50-digit π
 ```
 
 ---
@@ -632,6 +682,34 @@ Trigonometry.normalizeDegrees(370); // 10   (wraps to [0, 360))
 Trigonometry.normalizeRadians(7); // ≈0.72 (wraps to [0, 2π))
 ```
 
+#### Mathematical Constants
+
+All constants are `static readonly` properties:
+
+| Constant | Value                     | Python equivalent |
+| -------- | ------------------------- | ----------------- |
+| `PI`     | `3.141592653589793`       | `math.pi`         |
+| `E`      | `2.718281828459045`       | `math.e`          |
+| `TAU`    | `6.283185307179586` (2·π) | `math.tau`        |
+| `PHI`    | `1.618033988749895` (φ)   | —                 |
+| `SQRT2`  | `1.4142135623730951`      | `math.sqrt(2)`    |
+| `LN2`    | `0.6931471805599453`      | `math.log(2)`     |
+| `LN10`   | `2.302585092994046`       | `math.log(10)`    |
+| `LOG2E`  | `1.4426950408889634`      | `math.log2(e)`    |
+| `LOG10E` | `0.4342944819032518`      | `math.log10(e)`   |
+
+```ts
+Trigonometry.PI; // 3.141592653589793
+Trigonometry.E; // 2.718281828459045
+Trigonometry.TAU; // 6.283185307179586
+Trigonometry.PHI; // 1.618033988749895  (golden ratio)
+Trigonometry.SQRT2; // 1.4142135623730951
+
+// Use in calculations
+2 * Trigonometry.PI === Trigonometry.TAU; // true
+Trigonometry.PHI ** 2 === Trigonometry.PHI + 1; // true (approximately)
+```
+
 #### Triangle Helpers
 
 ```ts
@@ -1167,7 +1245,7 @@ Matrix.fromJSON(json); // number[][] from JSON object
 
 #### Chainable Instance API
 
-```ts
+````ts
 const result = new Matrix([
   [1, 2],
   [3, 4],
@@ -1218,6 +1296,560 @@ new Matrix([
 
 ---
 
+### NDArray
+
+N-dimensional array with numpy-inspired API. The core building block for all scientific computing modules.
+
+```ts
+import { NDArray } from "numwiz";
+````
+
+#### Creation
+
+```ts
+NDArray.zeros([2, 3]); // 2×3 array of zeros
+NDArray.ones([2, 3]); // 2×3 array of ones
+NDArray.full([2, 2], 7); // 2×2 filled with 7
+NDArray.eye(3); // 3×3 identity
+NDArray.arange(0, 5); // [0, 1, 2, 3, 4]
+NDArray.arange(0, 1, 0.2); // [0, 0.2, 0.4, 0.6, 0.8]
+NDArray.linspace(0, 1, 5); // [0, 0.25, 0.5, 0.75, 1]
+NDArray.logspace(0, 2, 3); // [1, 10, 100]
+NDArray.geomspace(1, 8, 4); // [1, 2, 4, 8]
+NDArray.from([
+  [1, 2],
+  [3, 4],
+]); // 2D from nested array
+NDArray.diag([1, 2, 3]); // diagonal matrix
+```
+
+#### Shape & Indexing
+
+```ts
+const a = NDArray.arange(0, 12).reshape([3, 4]);
+a.shape; // [3, 4]
+a.ndim; // 2
+a.size; // 12
+a.get(0, 1); // 1
+a.set(0, 0, 99); // returns new NDArray
+a.flatten(); // 1D NDArray
+a.transpose(); // 4×3 NDArray — also a.T
+a.squeeze(); // remove length-1 dimensions
+a.expandDims(0); // insert new axis at position 0
+a.swapaxes(0, 1); // swap axes
+a.slice([
+  [0, 2],
+  [1, 3],
+]); // sub-array
+```
+
+#### Element-wise Math
+
+```ts
+const b = NDArray.from([4, 9, 16]);
+NDArray.sqrt(b).toArray(); // [2, 3, 4]
+NDArray.abs(b);
+NDArray.exp(b);
+NDArray.log(b); // natural log
+NDArray.sin(b);
+NDArray.cos(b);
+NDArray.floor(b);
+NDArray.ceil(b);
+NDArray.round(b);
+NDArray.square(b); // element-wise b²
+NDArray.clip(b, 5, 12); // clamp to [5, 12]
+NDArray.add(b, b); // element-wise sum
+NDArray.subtract(b, b);
+NDArray.multiply(b, b);
+NDArray.divide(b, b);
+NDArray.power(b, 2);
+NDArray.maximum(b, b);
+NDArray.minimum(b, b);
+```
+
+#### Reductions
+
+```ts
+const c = NDArray.from([
+  [1, 2, 3],
+  [4, 5, 6],
+]);
+c.sum(); // 21   (all elements)
+c.sum(0).toArray(); // [5, 7, 9]  (column sums)
+c.sum(1).toArray(); // [6, 15]    (row sums)
+c.mean();
+c.std();
+c.variance();
+c.min();
+c.max();
+c.product();
+c.argmin();
+c.argmax();
+c.cumsum().toArray();
+c.nonzero();
+```
+
+#### Matrix Operations
+
+```ts
+const m = NDArray.from([
+  [1, 2],
+  [3, 4],
+]);
+m.dot(m).toArray(); // [[7,10],[15,22]]
+NDArray.dot(m, m);
+m.trace(); // 5
+m.diagonal().toArray(); // [1, 4]
+```
+
+#### Stack / Combine
+
+```ts
+NDArray.concatenate([a, b], 0); // stack along axis 0
+NDArray.stack([a, b]); // new axis
+NDArray.hstack([a, b]);
+NDArray.vstack([a, b]);
+```
+
+---
+
+### LinAlg
+
+Linear algebra on 2D arrays (equivalent to `numpy.linalg`).
+
+```ts
+import { LinAlg } from "numwiz";
+
+const A = [
+  [1, 2],
+  [3, 4],
+];
+```
+
+| Method       | Description                                | Example                                    |
+| ------------ | ------------------------------------------ | ------------------------------------------ |
+| `inv`        | Matrix inverse                             | `LinAlg.inv(A)` → `[[-2,1],[1.5,-0.5]]`    |
+| `det`        | Determinant                                | `LinAlg.det(A)` → `-2`                     |
+| `eig`        | Eigenvalues + eigenvectors                 | `LinAlg.eig(A)` → `{ values, vectors }`    |
+| `eigvals`    | Eigenvalues only                           | `LinAlg.eigvals(A)` → `[5.37, -0.37]`      |
+| `svd`        | Singular value decomposition               | `LinAlg.svd(A)` → `{ U, S, Vt }`           |
+| `solve`      | Solve Ax = b                               | `LinAlg.solve(A, [1,2])` → `[0, 0.5]`      |
+| `qr`         | QR decomposition                           | `LinAlg.qr(A)` → `{ Q, R }`                |
+| `lu`         | LU decomposition                           | `LinAlg.lu(A)` → `{ L, U, P }`             |
+| `cholesky`   | Cholesky decomposition (positive-definite) | `LinAlg.cholesky([[4,2],[2,3]])` → `{ L }` |
+| `pinv`       | Moore-Penrose pseudo-inverse               | `LinAlg.pinv(A)`                           |
+| `lstsq`      | Least-squares solution                     | `LinAlg.lstsq(A, b)`                       |
+| `norm`       | Matrix / vector norm                       | `LinAlg.norm(A)` → Frobenius norm          |
+| `matrixRank` | Rank via SVD                               | `LinAlg.matrixRank(A)` → `2`               |
+| `trace`      | Sum of diagonal elements                   | `LinAlg.trace(A)` → `5`                    |
+| `kron`       | Kronecker product                          | `LinAlg.kron(A, B)`                        |
+| `cond`       | Condition number                           | `LinAlg.cond(A)`                           |
+| `solveLower` | Forward substitution (lower triangular)    | `LinAlg.solveLower(L, b)`                  |
+| `solveUpper` | Back substitution (upper triangular)       | `LinAlg.solveUpper(U, b)`                  |
+| `dot`        | Matrix / vector dot product                | `LinAlg.dot(A, B)`                         |
+
+```ts
+// Solve a linear system
+const { values, vectors } = LinAlg.eig([
+  [2, 1],
+  [1, 2],
+]);
+values; // [3, 1]
+
+// SVD
+const { U, S, Vt } = LinAlg.svd([
+  [1, 2],
+  [3, 4],
+]);
+```
+
+---
+
+### Polynomial
+
+Polynomial arithmetic, evaluation, root-finding and fitting.
+
+```ts
+import { PolyModule, Polynomial } from "numwiz";
+```
+
+#### `PolyModule` — static utility methods
+
+| Method       | Description                     | Example                                         |
+| ------------ | ------------------------------- | ----------------------------------------------- |
+| `fromRoots`  | Build poly from roots           | `PolyModule.fromRoots([1, 2])` → `x²-3x+2`      |
+| `eval`       | Evaluate at a point             | `PolyModule.eval([1, -3, 2], 3)` → `2`          |
+| `add`        | Add two polynomials             | `PolyModule.add([1, 2], [3, 4])`                |
+| `sub`        | Subtract polynomials            |                                                 |
+| `mul`        | Multiply polynomials            | `PolyModule.mul([1, 2], [1, 3])` → `[1,5,6]`    |
+| `divmod`     | Polynomial division + remainder | `PolyModule.divmod(p, d)` → `{ q, r }`          |
+| `derivative` | Differentiate                   | `PolyModule.derivative([3, 2, 1])` → `[6, 2]`   |
+| `integrate`  | Integrate (with const C)        | `PolyModule.integrate([3, 2, 1])` → `[1,1,1,0]` |
+| `roots`      | Find all roots                  | `PolyModule.roots([1, -3, 2])` → `[2, 1]`       |
+| `fit`        | Least-squares polynomial fit    | `PolyModule.fit(xs, ys, degree)`                |
+| `gcd`        | Polynomial GCD                  |                                                 |
+| `lcm`        | Polynomial LCM                  |                                                 |
+
+#### `Polynomial` — chainable class
+
+```ts
+const p = new Polynomial([1, -3, 2]); // x² - 3x + 2
+
+p.eval(3); // 2
+p.degree(); // 2
+p.derivative(); // Polynomial(2x - 3)
+p.integrate(0); // Polynomial with constant 0
+p.roots(); // [2, 1]
+p.add(new Polynomial([1, 1])); // x² - 2x + 3
+p.toString(); // "x^2 - 3x + 2"
+```
+
+---
+
+### Calculus
+
+Numerical differentiation and integration.
+
+```ts
+import { Calculus } from "numwiz";
+```
+
+#### Differentiation
+
+| Method          | Description                                   | Example                                      |
+| --------------- | --------------------------------------------- | -------------------------------------------- |
+| `derivative`    | First derivative (central difference, h=1e-5) | `Calculus.derivative(x => x**3, 2)` → `≈12`  |
+| `derivative2`   | Second derivative                             | `Calculus.derivative2(x => x**3, 2)` → `≈12` |
+| `nthDerivative` | nth derivative at a point                     | `Calculus.nthDerivative(f, x, n)`            |
+| `gradient`      | Gradient vector of a multivariate function    | `Calculus.gradient(f, [x, y])`               |
+| `jacobian`      | Jacobian matrix                               | `Calculus.jacobian(fs, [x, y])`              |
+| `hessian`       | Hessian matrix                                | `Calculus.hessian(f, [x, y])`                |
+| `directional`   | Directional derivative                        | `Calculus.directional(f, point, direction)`  |
+| `taylor`        | Taylor series coefficients                    | `Calculus.taylor(f, x0, n)`                  |
+
+#### Integration
+
+| Method       | Description                       | Example                                      |
+| ------------ | --------------------------------- | -------------------------------------------- |
+| `integrate`  | Adaptive Simpson's rule           | `Calculus.integrate(x => x**2, 0, 3)` → `≈9` |
+| `trapezoid`  | Trapezoidal rule                  | `Calculus.trapezoid(f, 0, 1, 100)`           |
+| `simpson`    | Composite Simpson's 1/3 rule      | `Calculus.simpson(f, 0, 1, 100)`             |
+| `simpson38`  | Simpson's 3/8 rule                |                                              |
+| `gauss5`     | 5-point Gauss–Legendre quadrature | `Calculus.gauss5(f, 0, 1)`                   |
+| `romberg`    | Romberg integration               | `Calculus.romberg(f, 0, 1)` → high accuracy  |
+| `monteCarlo` | Monte Carlo integration           | `Calculus.monteCarlo(f, 0, 1, 100000)`       |
+
+#### Root-finding
+
+| Method       | Description                        |
+| ------------ | ---------------------------------- |
+| `bisection`  | Bisection method                   |
+| `newton`     | Newton-Raphson method              |
+| `secant`     | Secant method                      |
+| `fixedPoint` | Fixed-point iteration              |
+| `brentq`     | Brent's method (robust bracketing) |
+
+```ts
+Calculus.derivative(Math.sin, 0); // ≈1 (cos 0)
+Calculus.integrate((x) => x ** 2, 0, 3); // ≈9
+Calculus.bisection((x) => x * x - 2, 1, 2); // ≈1.4142
+Calculus.newton(
+  (x) => x * x - 2,
+  (x) => 2 * x,
+  1
+); // ≈1.4142
+```
+
+#### Optimization
+
+| Method          | Description                       |
+| --------------- | --------------------------------- |
+| `minimize`      | Gradient descent minimization     |
+| `goldenSection` | Golden-section search for minimum |
+
+---
+
+### FFT
+
+Fast Fourier Transform for signal analysis.
+
+```ts
+import { FFT } from "numwiz";
+```
+
+| Method          | Description                                      |
+| --------------- | ------------------------------------------------ | --- | ---- |
+| `fft`           | Full complex FFT → NDArray of `{re, im}` objects |
+| `ifft`          | Inverse FFT                                      |
+| `rfft`          | Real FFT (only positive frequencies) → NDArray   |
+| `irfft`         | Inverse real FFT                                 |
+| `fftFreq`       | Frequency bins for a given sample size and rate  |
+| `powerSpectrum` | Power spectrum `                                 | X   | ²/N` |
+| `magnitude`     | Magnitude spectrum `                             | X   | `    |
+| `phase`         | Phase spectrum (radians)                         |
+| `fftShift`      | Shift zero-frequency component to centre         |
+| `ifftShift`     | Inverse of `fftShift`                            |
+| `nextPow2`      | Smallest power-of-2 ≥ n                          |
+| `zeroPad`       | Zero-pad (or truncate) to length n               |
+| `hanning`       | Hanning window                                   |
+| `hamming`       | Hamming window                                   |
+| `blackman`      | Blackman window                                  |
+| `bartlett`      | Bartlett window                                  |
+| `applyWindow`   | Multiply signal by a window function             |
+| `stft`          | Short-time Fourier transform                     |
+
+```ts
+// Basic FFT
+const X = FFT.fft([1, 0, -1, 0]);
+// X = NDArray of complex objects {re, im}
+
+// Frequencies for 8-point FFT at 1 kHz sample rate
+FFT.fftFreq(8, 1 / 1000).toArray(); // [-500, -375, -250, -125, 0, 125, 250, 375]
+
+// Power spectrum
+FFT.powerSpectrum([1, 2, 3, 4]).toArray();
+
+// Apply Hanning window before FFT
+const windowed = FFT.applyWindow(signal, FFT.hanning(signal.length));
+const spectrum = FFT.rfft(windowed);
+```
+
+---
+
+### Interpolation
+
+Numerical interpolation methods.
+
+```ts
+import { Interpolation, CubicSpline } from "numwiz";
+
+const xs = [0, 1, 2, 3, 4];
+const ys = [0, 1, 4, 9, 16];
+```
+
+| Method        | Description                             | Example                                     |
+| ------------- | --------------------------------------- | ------------------------------------------- |
+| `linear`      | Linear (piecewise) interpolation        | `Interpolation.linear(xs, ys, 1.5)` → `2.5` |
+| `nearest`     | Nearest-neighbour interpolation         |                                             |
+| `polynomial`  | Lagrange polynomial interpolation       | `Interpolation.polynomial(xs, ys, 2.5)`     |
+| `barycentric` | Barycentric form (numerically stable)   |                                             |
+| `newtonFwd`   | Newton forward-difference interpolation |                                             |
+| `bilinear`    | 2D bilinear interpolation               | `Interpolation.bilinear(grid, x, y)`        |
+| `bicubic`     | 2D bicubic interpolation (keys kernel)  |                                             |
+| `runge`       | Runge phenomenon demo helper            |                                             |
+
+#### `CubicSpline` — class
+
+```ts
+const spline = new CubicSpline(xs, ys); // natural cubic spline
+spline.interpolate(2.5); // single point
+spline.interpolate([0.5, 1.5, 2.5]); // array of points → number[]
+```
+
+---
+
+### Signal
+
+Digital signal processing utilities.
+
+```ts
+import { Signal } from "numwiz";
+```
+
+| Method              | Description                                          | Example                              |
+| ------------------- | ---------------------------------------------------- | ------------------------------------ |
+| `convolve`          | Discrete convolution                                 | `Signal.convolve([1,2,3], [1,1])`    |
+| `correlate`         | Cross-correlation                                    |                                      |
+| `firFilter`         | Apply a FIR filter                                   | `Signal.firFilter(signal, coeffs)`   |
+| `firDesign`         | Design a FIR filter (window method)                  | `Signal.firDesign(cutoff, numTaps)`  |
+| `movingAverage`     | Moving average (FIR low-pass)                        | `Signal.movingAverage(data, 5)`      |
+| `downSample`        | Downsample by factor n                               | `Signal.downSample(data, 2)`         |
+| `upSample`          | Upsample by factor n (zero insertion)                | `Signal.upSample(data, 2)`           |
+| `zeroPad`           | Zero-pad to length n (truncates if n < length)       | `Signal.zeroPad(data, 16)`           |
+| `normalize`         | Peak normalise to range [-1, 1]                      | `Signal.normalize(data)`             |
+| `rms`               | Root mean square amplitude                           | `Signal.rms(data)`                   |
+| `energy`            | Signal energy (sum of squares)                       | `Signal.energy(data)`                |
+| `snr`               | Signal-to-noise ratio (dB)                           | `Signal.snr(signal, noise)`          |
+| `thd`               | Total harmonic distortion                            | `Signal.thd(spectrum, fundamental)`  |
+| `instantaneousFreq` | Instantaneous frequency via phase derivative         |                                      |
+| `hilbert`           | Hilbert transform (analytic signal envelope)         | `Signal.hilbert(data)`               |
+| `dtft`              | Discrete-time Fourier transform at given frequencies |                                      |
+| `autocorrelation`   | Autocorrelation sequence                             | `Signal.autocorrelation(data)`       |
+| `generateSine`      | Generate a sine wave                                 | `Signal.generateSine(freq, fs, dur)` |
+| `generateSquare`    | Generate a square wave                               |                                      |
+| `generateSawtooth`  | Generate a sawtooth wave                             |                                      |
+| `addNoise`          | Add Gaussian noise                                   | `Signal.addNoise(data, stdDev)`      |
+
+```ts
+// Design and apply a low-pass FIR filter
+const coeffs = Signal.firDesign(0.2, 31); // cutoff=0.2 (normalised), 31 taps
+const filtered = Signal.firFilter(audioData, coeffs);
+
+// Moving average smoothing
+const smoothed = Signal.movingAverage(data, 5);
+
+// Generate a 440 Hz tone at 44100 Hz for 1 second
+const tone = Signal.generateSine(440, 44100, 1.0);
+
+// SNR of recovered signal vs noise component
+const snrDB = Signal.snr(cleanSignal, noiseArray);
+```
+
+---
+
+### BigPrecision
+
+Arbitrary-precision decimal arithmetic, analogous to Python's `decimal.Decimal`. Built on [`decimal.js`](https://mikemcl.github.io/decimal.js/).
+
+```ts
+import { BigPrecision, RoundingMode } from "numwiz";
+```
+
+#### The core floating-point problem
+
+```ts
+// JavaScript native floats
+0.1 + 0.2 === 0.3; // false  (0.30000000000000004)
+
+// BigPrecision — exact decimal arithmetic
+new BigPrecision("0.1").add("0.2").toString(); // "0.3" ✓
+```
+
+#### Construction
+
+```ts
+new BigPrecision(42); // from integer
+new BigPrecision("3.14159"); // from string — lossless
+new BigPrecision(3.14); // from float (note: limited to JS float precision)
+new BigPrecision(other); // copy from another BigPrecision
+```
+
+#### Arithmetic
+
+```ts
+const a = new BigPrecision("1.1");
+const b = new BigPrecision("2.2");
+
+a.add(b).toString(); // "3.3"
+a.sub(b).toString(); // "-1.1"
+a.mul(b).toString(); // "2.42"
+a.div(b).toString(); // "0.5"    (may differ at high precision)
+a.mod("0.7"); // "0.4"
+a.pow("3"); // "1.331"
+a.abs();
+a.neg();
+a.reciprocal(); // 1/a
+```
+
+#### Mathematical Functions
+
+```ts
+new BigPrecision("9").sqrt().toString(); // "3"
+new BigPrecision("27").cbrt().toString(); // "3"
+new BigPrecision("1").exp().toString(); // "2.71828182845904523536..." (e)
+new BigPrecision("1").ln().toString(); // "0"   (ln(e)=1 → wait, ln(1)=0)
+new BigPrecision("100").log10().toString(); // "2"
+new BigPrecision("8").log2().toString(); // "3"
+new BigPrecision("8").log(2).toString(); // "3"   (arbitrary base)
+```
+
+#### Rounding / Quantize
+
+```ts
+// Analogous to Python's quantize()
+new BigPrecision("1.005").quantize(2).toString(); // "1.01"  (ROUND_HALF_UP)
+
+// Custom rounding modes
+new BigPrecision("2.5").quantize(0, RoundingMode.ROUND_HALF_EVEN).toString(); // "2"  (banker's)
+new BigPrecision("1.999").quantize(2, RoundingMode.ROUND_DOWN).toString(); // "1.99"
+
+new BigPrecision("3.7").ceil().toString(); // "4"
+new BigPrecision("3.7").floor().toString(); // "3"
+new BigPrecision("3.7").trunc().toString(); // "3"
+```
+
+#### Rounding Modes
+
+| Constant                       | Description                   |
+| ------------------------------ | ----------------------------- |
+| `RoundingMode.ROUND_UP`        | Away from zero                |
+| `RoundingMode.ROUND_DOWN`      | Toward zero (truncate)        |
+| `RoundingMode.ROUND_CEIL`      | Toward +∞                     |
+| `RoundingMode.ROUND_FLOOR`     | Toward −∞                     |
+| `RoundingMode.ROUND_HALF_UP`   | Half away from zero (default) |
+| `RoundingMode.ROUND_HALF_DOWN` | Half toward zero              |
+| `RoundingMode.ROUND_HALF_EVEN` | Banker's rounding             |
+
+#### Comparison
+
+```ts
+const a = new BigPrecision("3");
+a.gt("2"); // true
+a.lt("4"); // true
+a.gte("3"); // true
+a.lte("3"); // true
+a.equals("3.0"); // true
+a.compareTo("3"); // 0
+a.isZero(); // false
+a.isNegative(); // false
+a.isInteger(); // true
+```
+
+#### Precision Control
+
+```ts
+// Default precision: 20 significant digits
+BigPrecision.setPrecision(50);
+BigPrecision.pi().toString();
+// "3.14159265358979323846264338327950288419716939937510"
+
+BigPrecision.setPrecision(100);
+new BigPrecision("2").sqrt().toString();
+// 100-digit √2
+
+BigPrecision.getPrecision(); // 100
+BigPrecision.setRoundingMode(RoundingMode.ROUND_HALF_EVEN);
+```
+
+#### Static Utilities
+
+```ts
+BigPrecision.pi(); // high-precision π
+BigPrecision.e(); // high-precision e
+BigPrecision.max("1", "5", "3"); // BigPrecision("5")
+BigPrecision.min("1", "5", "3"); // BigPrecision("1")
+BigPrecision.sum(["1.1", "2.2", "3.3"]); // BigPrecision("6.6")
+```
+
+#### Output
+
+```ts
+const v = new BigPrecision("3.14159265");
+v.toString(); // "3.14159265"
+v.toFixed(4); // "3.1416"
+v.toSignificantDigits(5); // "3.1416"
+v.toNumber(); // 3.14159265  (JS float, may lose precision)
+v.toDecimal(); // underlying decimal.js Decimal instance
+```
+
+---
+
+##nst { Q, R } = new Matrix(A).qr();
+new Matrix([
+[2, 1],
+[1, 3],
+])
+.solve([[5], [10]])
+.toArray(); // [[1],[3]]
+
+````
+
+**Chainable methods:** `add`, `subtract`, `multiply`, `scale`, `negate`, `hadamard`, `elementDivide`, `elementPower`, `power`, `scalarAdd`, `scalarSubtract`, `transpose`, `inverse`, `adjugate`, `ref`, `rref`, `solve`, `hStack`, `vStack`, `slice`, `reshape`, `swapRows`, `swapCols`, `map`, `round`, `abs`, `clone`, `print`
+
+**Terminal methods:** `toArray`, `flatten`, `getDiagonal`, `getRows`, `getCols`, `getShape`, `getSize`, `getElement`, `determinant`, `trace`, `sum`, `min`, `max`, `mean`, `rank`, `norm`, `normFrobenius`, `eigenvalues`, `isSquare`, `isIdentity`, `isSymmetric`, `isDiagonal`, `isUpperTriangular`, `isLowerTriangular`, `isOrthogonal`, `isSingular`, `isZero`, `equals`, `isEqual`, `toString`, `lu`, `qr`
+
+---
+
 ## Subpath Imports
 
 Each module is independently importable for tree-shaking:
@@ -1239,10 +1871,20 @@ import Formatting from "numwiz/formatting";
 import Currency from "numwiz/currency";
 import Matrix from "numwiz/matrix";
 import NumberWords from "numwiz/number-words";
+// Scientific computing
+import NDArray from "numwiz/ndarray";
+import LinAlg from "numwiz/linalg";
+import PolyModule, { Polynomial } from "numwiz/polynomial";
+import Calculus from "numwiz/calculus";
+import FFT from "numwiz/fft";
+import Interpolation, { CubicSpline } from "numwiz/interpolation";
+import Signal from "numwiz/signal";
+// Arbitrary precision
+import BigPrecision, { RoundingMode } from "numwiz/precision";
 
 // Types only
 import type { Matrix2D, LUResult, QRResult } from "numwiz/types";
-```
+````
 
 ---
 
@@ -1331,6 +1973,7 @@ Key exported types:
 | `NumWizOptions`     | `{ safe?: boolean }`                           |
 | `WeightedItem<T>`   | `{ value: T, weight: number }`                 |
 | `LocaleData`        | Locale definition structure                    |
+| `RoundingMode`      | Rounding mode constants for `BigPrecision`     |
 
 ---
 
@@ -1348,6 +1991,11 @@ Key exported types:
 | Inverse trig out-of-domain          | `RangeError` | `Trigonometry.asin(2)`                             |
 | Locale not registered               | `Error`      | Unknown locale code                                |
 | Linearly dependent columns (QR)     | `Error`      | `Matrix.qr` on rank-deficient matrix               |
+| BigPrecision: division by zero      | `Error`      | `new BigPrecision("5").div(0)`                     |
+| BigPrecision: sqrt of negative      | `RangeError` | `new BigPrecision("-1").sqrt()`                    |
+| BigPrecision: log of non-positive   | `RangeError` | `new BigPrecision("0").ln()`                       |
+| BigPrecision: invalid log base      | `RangeError` | `new BigPrecision("8").log(1)`                     |
+| BigPrecision: reciprocal of zero    | `Error`      | `new BigPrecision("0").reciprocal()`               |
 
 > Use [`numwiz.safe()`](#safe-mode) on the chainable API to convert runtime errors into `NaN` values instead of throws.
 

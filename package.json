@@ -79,6 +79,38 @@
     },
     "./types": {
       "types": "./dist/src/types.d.ts"
+    },
+    "./ndarray": {
+      "require": "./dist/src/ndarray.js",
+      "types": "./dist/src/ndarray.d.ts"
+    },
+    "./linalg": {
+      "require": "./dist/src/linalg.js",
+      "types": "./dist/src/linalg.d.ts"
+    },
+    "./polynomial": {
+      "require": "./dist/src/polynomial.js",
+      "types": "./dist/src/polynomial.d.ts"
+    },
+    "./calculus": {
+      "require": "./dist/src/calculus.js",
+      "types": "./dist/src/calculus.d.ts"
+    },
+    "./fft": {
+      "require": "./dist/src/fft.js",
+      "types": "./dist/src/fft.d.ts"
+    },
+    "./interpolation": {
+      "require": "./dist/src/interpolation.js",
+      "types": "./dist/src/interpolation.d.ts"
+    },
+    "./signal": {
+      "require": "./dist/src/signal.js",
+      "types": "./dist/src/signal.d.ts"
+    },
+    "./precision": {
+      "require": "./dist/src/precision.js",
+      "types": "./dist/src/precision.d.ts"
     }
   },
   "scripts": {
@@ -103,7 +135,16 @@
     "statistics",
     "formatting",
     "utility",
-    "typescript"
+    "typescript",
+    "numpy",
+    "ndarray",
+    "fft",
+    "interpolation",
+    "linear-algebra",
+    "polynomial",
+    "signal-processing",
+    "calculus",
+    "scientific-computing"
   ],
   "publishConfig": {
     "access": "public"
@@ -132,5 +173,8 @@
       "js",
       "json"
     ]
+  },
+  "dependencies": {
+    "decimal.js": "^10.6.0"
   }
 }
