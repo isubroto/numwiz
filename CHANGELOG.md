@@ -1,3 +1,10 @@
+## [1.1.2](https://github.com/isubroto/numwiz/compare/v1.1.1...v1.1.2) (2026-03-05)
+
+
+### Bug Fixes
+
+* add 'post/' directory to .gitignore ([85e43de](https://github.com/isubroto/numwiz/commit/85e43de438ca47f4377356b3df7a19418467d160))
+
 ## [1.1.1](https://github.com/isubroto/numwiz/compare/v1.1.0...v1.1.1) (2026-03-04)
 
 
