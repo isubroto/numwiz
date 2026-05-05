@@ -18,12 +18,12 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: "25"
           cache: npm
@@ -50,21 +50,19 @@ jobs:
       - name: Validate package
         run: npm run package:validate
 
-      - name: Install semantic-release
-        run: |
-          npm install --no-save \
-            semantic-release \
-            @semantic-release/git \
-            @semantic-release/npm \
-            @semantic-release/github \
-            @semantic-release/commit-analyzer \
-            @semantic-release/release-notes-generator \
-            @semantic-release/changelog \
-            @semantic-release/exec
-
       - name: Run semantic-release
         id: release
-        run: npx semantic-release --branches main
+        run: |
+          npx --yes \
+            --package semantic-release \
+            --package @semantic-release/git \
+            --package @semantic-release/npm \
+            --package @semantic-release/github \
+            --package @semantic-release/commit-analyzer \
+            --package @semantic-release/release-notes-generator \
+            --package @semantic-release/changelog \
+            --package @semantic-release/exec \
+            semantic-release --branches main
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}

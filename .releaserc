@@ -9,20 +9,23 @@
         [
             "@semantic-release/exec",
             {
-                "prepareCmd": "npm run build"
+                "prepareCmd": "node scripts/set-version.cjs ${nextRelease.version} && npm run release:validate"
             }
         ],
         "@semantic-release/npm",
-        "@semantic-release/github",
         [
             "@semantic-release/git",
             {
                 "assets": [
+                    "package.json",
+                    "package-lock.json",
                     "CHANGELOG.md",
-                    "package.json"
+                    "benchmark/RESULTS.md",
+                    "benchmark/results.json"
                 ],
-                "message": "${nextRelease.version}"
+                "message": "chore(release): ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
             }
-        ]
+        ],
+        "@semantic-release/github"
     ]
 }

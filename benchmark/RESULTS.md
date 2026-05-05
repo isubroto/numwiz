@@ -1,6 +1,6 @@
 # NumWiz Benchmark Report
 
-Generated: 2026-05-05T14:41:17.828Z
+Generated: 2026-05-05T15:16:51.117Z
 
 ## Methodology
 
@@ -12,7 +12,7 @@ Generated: 2026-05-05T14:41:17.828Z
 
 ## Environment
 
-- Package: numwiz@1.1.2
+- Package: numwiz@1.2.0
 - Node.js: v25.8.2
 - Platform: win32 x64
 - CPU: AMD Ryzen 7 4800H with Radeon Graphics
@@ -24,16 +24,16 @@ Generated: 2026-05-05T14:41:17.828Z
 
 | Category | Workload | Units/run | Median | p95 | Throughput | Heap/run | Batch |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| arithmetic | validated floating-point reduction | 2,000 | 1.580e-2 ms | 1.674e-2 ms | 126,594,798 units/s | 5.101e-1 KB | 1024 |
-| formatting | commas, abbreviations, and currency formatting | 600 | 25.91 ms | 26.69 ms | 23,155 units/s | 1,020 KB | 1 |
-| statistics | mean, standard deviation, quartiles, skewness | 2,000 | 1.6536 ms | 1.9523 ms | 1,209,473 units/s | 504.38 KB | 8 |
-| matrix | 8x8 multiply plus 4x4 solve | 512 | 6.928e-2 ms | 7.497e-2 ms | 7,390,125 units/s | 8.6935 KB | 256 |
-| ndarray | vector add, multiply, and sum | 2,048 | 1.3334 ms | 1.3558 ms | 1,535,866 units/s | 242.35 KB | 16 |
-| linalg | solve, inverse, and eigenvalues on small dense matrices | 16 | 1.495e-2 ms | 1.935e-2 ms | 1,069,899 units/s | 2.1612 KB | 1024 |
-| fft | 512-sample real FFT and magnitude spectrum | 512 | 1.000e-1 ms | 1.156e-1 ms | 5,119,360 units/s | 45.98 KB | 128 |
-| calculus | Simpson integration and finite-difference derivative | 1,000 | 1.352e-2 ms | 1.388e-2 ms | 73,962,253 units/s | 1.565e-1 KB | 2048 |
-| precision | BigPrecision decimal accumulation | 200 | 6.361e-2 ms | 6.756e-2 ms | 3,144,094 units/s | 15.20 KB | 256 |
-| chain | chain API arithmetic and rounding | 1,000 | 3.065e-3 ms | 3.104e-3 ms | 326,282,207 units/s | 5.531e-5 KB | 8192 |
+| arithmetic | validated floating-point reduction | 2,000 | 1.490e-2 ms | 1.534e-2 ms | 134,196,525 units/s | 5.101e-1 KB | 1024 |
+| formatting | commas, abbreviations, and currency formatting | 600 | 24.27 ms | 25.20 ms | 24,717 units/s | 1,020 KB | 1 |
+| statistics | mean, standard deviation, quartiles, skewness | 2,000 | 1.5193 ms | 1.6275 ms | 1,316,407 units/s | 237.22 KB | 16 |
+| matrix | 8x8 multiply plus 4x4 solve | 512 | 6.274e-2 ms | 7.231e-2 ms | 8,160,988 units/s | 8.6718 KB | 256 |
+| ndarray | vector add, multiply, and sum | 2,048 | 1.2547 ms | 1.2787 ms | 1,632,238 units/s | 242.35 KB | 16 |
+| linalg | solve, inverse, and eigenvalues on small dense matrices | 16 | 1.565e-2 ms | 1.980e-2 ms | 1,022,166 units/s | 2.3061 KB | 1024 |
+| fft | 512-sample real FFT and magnitude spectrum | 512 | 9.860e-2 ms | 1.114e-1 ms | 5,192,924 units/s | 14.40 KB | 256 |
+| calculus | Simpson integration and finite-difference derivative | 1,000 | 1.272e-2 ms | 1.505e-2 ms | 78,596,620 units/s | 1.565e-1 KB | 2048 |
+| precision | BigPrecision decimal accumulation | 200 | 5.786e-2 ms | 6.716e-2 ms | 3,456,820 units/s | 15.20 KB | 256 |
+| chain | chain API arithmetic and rounding | 1,000 | 3.022e-3 ms | 3.062e-3 ms | 330,897,649 units/s | 5.531e-5 KB | 8192 |
 
 ## Accuracy Snapshot
 
