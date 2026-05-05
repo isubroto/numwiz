@@ -1,4 +1,5 @@
 import NumberWords from "./number-words";
+import { numwizError } from "./errors";
 
 class Currency {
   // ==========================================
@@ -6,10 +7,22 @@ class Currency {
   // ==========================================
 
   static format(amount: number, currency = "USD", locale = "en-US"): string {
-    return new Intl.NumberFormat(locale, {
-      style: "currency",
-      currency,
-    }).format(amount);
+    Currency._validateAmount(amount, "format");
+    try {
+      return new Intl.NumberFormat(locale, {
+        style: "currency",
+        currency,
+      }).format(amount);
+    } catch (error) {
+      throw numwizError(
+        error instanceof RangeError ? RangeError : Error,
+        "Currency",
+        "format",
+        "invalid locale or currency code",
+        "a valid BCP 47 locale and ISO 4217 currency code",
+        { locale, currency }
+      );
+    }
   }
 
   // ==========================================
@@ -17,6 +30,7 @@ class Currency {
   // ==========================================
 
   static formatIndian(amount: number, symbol = "₹"): string {
+    Currency._validateAmount(amount, "formatIndian");
     const isNeg = amount < 0;
     const num = Math.abs(amount);
     const [intPart, decPart] = num.toFixed(2).split(".");
@@ -38,6 +52,7 @@ class Currency {
   // ==========================================
 
   static abbreviateWestern(amount: number, symbol = "$", decimals = 1): string {
+    Currency._validateAmount(amount, "abbreviateWestern");
     const units = [
       { value: 1e15, label: "Q" },
       { value: 1e12, label: "T" },
@@ -58,6 +73,7 @@ class Currency {
   }
 
   static abbreviateIndian(amount: number, symbol = "₹", decimals = 1): string {
+    Currency._validateAmount(amount, "abbreviateIndian");
     const units = [
       { value: 1e11, label: " Kharab" },
       { value: 1e9, label: " Arab" },
@@ -82,6 +98,7 @@ class Currency {
   // ==========================================
 
   static toWords(amount: number, currency = "USD", locale = "en"): string {
+    Currency._validateAmount(amount, "toWords");
     return NumberWords.currencyToWords(amount, currency, locale, "western");
   }
 
@@ -90,10 +107,12 @@ class Currency {
     currency = "INR",
     locale = "en"
   ): string {
+    Currency._validateAmount(amount, "toWordsIndian");
     return NumberWords.currencyToWords(amount, currency, locale, "indian");
   }
 
   static toWordsHindi(amount: number, currency = "INR"): string {
+    Currency._validateAmount(amount, "toWordsHindi");
     return NumberWords.currencyToWords(amount, currency, "hi", "indian");
   }
 
@@ -143,7 +162,41 @@ class Currency {
   }
 
   static convert(amount: number, fromRate: number, toRate: number): number {
+    Currency._validateAmount(amount, "convert");
+    if (!Number.isFinite(fromRate) || fromRate === 0) {
+      throw numwizError(
+        RangeError,
+        "Currency",
+        "convert",
+        "invalid source exchange rate",
+        "a finite, non-zero fromRate",
+        fromRate
+      );
+    }
+    if (!Number.isFinite(toRate)) {
+      throw numwizError(
+        RangeError,
+        "Currency",
+        "convert",
+        "invalid target exchange rate",
+        "a finite toRate",
+        toRate
+      );
+    }
     return (amount / fromRate) * toRate;
+  }
+
+  private static _validateAmount(amount: number, method: string): void {
+    if (typeof amount !== "number" || !Number.isFinite(amount)) {
+      throw numwizError(
+        TypeError,
+        "Currency",
+        method,
+        "invalid amount",
+        "a finite JavaScript number",
+        amount
+      );
+    }
   }
 }
 

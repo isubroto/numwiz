@@ -3,7 +3,105 @@ export interface WeightedItem<T = unknown> {
   weight: number;
 }
 
+export class SeededRandom {
+  private state: number;
+
+  constructor(seed: number | string) {
+    this.state = SeededRandom.normalizeSeed(seed);
+  }
+
+  private static normalizeSeed(seed: number | string): number {
+    if (typeof seed === "number") {
+      if (!Number.isFinite(seed)) {
+        throw new TypeError("SeededRandom requires a finite numeric seed");
+      }
+      return seed >>> 0;
+    }
+
+    let hash = 2166136261;
+    for (let i = 0; i < seed.length; i++) {
+      hash ^= seed.charCodeAt(i);
+      hash = Math.imul(hash, 16777619);
+    }
+    return hash >>> 0;
+  }
+
+  private nextUint32(): number {
+    this.state = (1664525 * this.state + 1013904223) >>> 0;
+    return this.state;
+  }
+
+  float(): number {
+    return this.nextUint32() / 0x100000000;
+  }
+
+  floatBetween(min: number, max: number): number {
+    return this.float() * (max - min) + min;
+  }
+
+  intBetween(min: number, max: number): number {
+    return Math.floor(this.floatBetween(Math.ceil(min), Math.floor(max) + 1));
+  }
+
+  boolean(): boolean {
+    return this.float() >= 0.5;
+  }
+
+  pick<T>(arr: T[]): T {
+    return arr[this.intBetween(0, arr.length - 1)];
+  }
+
+  shuffle<T>(arr: T[]): T[] {
+    const copy = [...arr];
+    for (let i = copy.length - 1; i > 0; i--) {
+      const j = this.intBetween(0, i);
+      [copy[i], copy[j]] = [copy[j], copy[i]];
+    }
+    return copy;
+  }
+
+  sample<T>(arr: T[], count: number): T[] {
+    return this.shuffle(arr).slice(0, count);
+  }
+
+  generateList(count: number, min = 0, max = 100): number[] {
+    return Array.from({ length: count }, () => this.intBetween(min, max));
+  }
+
+  uniqueList(count: number, min = 0, max = 100): number[] {
+    const set = new Set<number>();
+    while (set.size < count && set.size < max - min + 1) {
+      set.add(this.intBetween(min, max));
+    }
+    return [...set];
+  }
+
+  gaussian(mean = 0, stdDev = 1): number {
+    const u = Math.max(this.float(), Number.EPSILON);
+    const v = this.float();
+    return (
+      Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v) * stdDev + mean
+    );
+  }
+
+  dice(sides = 6): number {
+    return this.intBetween(1, sides);
+  }
+
+  coin(): "heads" | "tails" {
+    return this.boolean() ? "heads" : "tails";
+  }
+}
+
 class Random {
+  static seed(seed: number | string): SeededRandom {
+    return new SeededRandom(seed);
+  }
+
+  static seeded(seed: number | string): SeededRandom {
+    return Random.seed(seed);
+  }
+
   static float(): number {
     return Math.random();
   }
