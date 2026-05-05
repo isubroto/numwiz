@@ -1,3 +1,10 @@
+# [1.2.0](https://github.com/isubroto/numwiz/compare/v1.1.2...v1.2.0) (2026-05-05)
+
+
+### Features
+
+* add ESM support and improve package exports ([5328558](https://github.com/isubroto/numwiz/commit/5328558c9c62d11ae00c6d3c0d9c304ccae8492b))
+
 ## [1.1.2](https://github.com/isubroto/numwiz/compare/v1.1.1...v1.1.2) (2026-03-05)
 
 
