@@ -4,7 +4,7 @@ import Validation from "./src/validation";
 import Conversion from "./src/conversion";
 import Formatting from "./src/formatting";
 import Currency from "./src/currency";
-import Random from "./src/random";
+import Random, { SeededRandom } from "./src/random";
 import Statistics from "./src/statistics";
 import Bitwise from "./src/bitwise";
 import Trigonometry from "./src/trigonometry";
@@ -22,12 +22,13 @@ import FFT from "./src/fft";
 import Interpolation, { CubicSpline } from "./src/interpolation";
 import Signal from "./src/signal";
 import BigPrecision, { RoundingMode } from "./src/precision";
+import { numwizError } from "./src/errors";
 
 // ======================================
 // CHAINABLE WRAPPER
 // ======================================
 
-interface NumWizOptions {
+export interface NumWizOptions {
   safe?: boolean;
 }
 
@@ -53,7 +54,14 @@ class NumWiz {
   private _ensureNumber(n: unknown): number {
     if (typeof n === "number" && !Number.isNaN(n)) return n as number;
     if (this._safe) return NaN;
-    throw new TypeError(`Expected a valid number, got: ${n}`);
+    throw numwizError(
+      TypeError,
+      "Chain",
+      "constructor",
+      "invalid initial value",
+      "a JavaScript number that is not NaN",
+      n
+    );
   }
 
   private _safeOp(fn: () => void): this {
@@ -122,14 +130,32 @@ class NumWiz {
 
   divide(n: number): this {
     return this._safeOp(() => {
-      if (n === 0) throw new Error("Division by zero");
+      if (n === 0) {
+        throw numwizError(
+          Error,
+          "Chain",
+          "divide",
+          "division by zero",
+          "a finite, non-zero denominator",
+          n
+        );
+      }
       this.value /= n;
     });
   }
 
   mod(n: number): this {
     return this._safeOp(() => {
-      if (n === 0) throw new Error("Modulus by zero");
+      if (n === 0) {
+        throw numwizError(
+          Error,
+          "Chain",
+          "mod",
+          "modulus by zero",
+          "a finite, non-zero divisor",
+          n
+        );
+      }
       this.value %= n;
     });
   }
@@ -142,7 +168,16 @@ class NumWiz {
 
   sqrt(): this {
     return this._safeOp(() => {
-      if (this.value < 0) throw new RangeError("sqrt of negative number");
+      if (this.value < 0) {
+        throw numwizError(
+          RangeError,
+          "Chain",
+          "sqrt",
+          "cannot take square root of a negative number",
+          "a non-negative current value",
+          this.value
+        );
+      }
       this.value = Math.sqrt(this.value);
     });
   }
@@ -394,6 +429,7 @@ export {
   Formatting,
   Currency,
   Random,
+  SeededRandom,
   Statistics,
   Bitwise,
   Trigonometry,

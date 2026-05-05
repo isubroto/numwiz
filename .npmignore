@@ -13,11 +13,11 @@ jest.config.*
 .prettierrc*
 .editorconfig
 
-# Docs & misc
-README.md
-MATRIX.md
-*.md
+# Docs & generated evidence
 test-errors.txt
+benchmark/results.json
+benchmark/RESULTS.md
+benchmark/*.log
 
 # Dependencies
 node_modules/
@@ -25,8 +25,9 @@ node_modules/
 # TypeScript cache
 *.tsbuildinfo
 
-# Coverage
+# Coverage and benchmarks
 coverage/
+benchmark/
 
 # Logs
 *.log

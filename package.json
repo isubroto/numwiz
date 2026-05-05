@@ -3,123 +3,193 @@
   "version": "1.1.2",
   "description": "The ultimate number utility — arithmetic, formatting, currency (Lakh/Crore & Million/Billion), number-to-words in 10+ languages, statistics, financial math & more.",
   "main": "dist/index.js",
+  "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
+  "sideEffects": false,
   "files": [
     "dist",
+    "docs",
+    "README.md",
+    "CHANGELOG.md",
     "LICENSE"
   ],
   "exports": {
     ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
       "require": "./dist/index.js",
-      "types": "./dist/index.d.ts"
+      "default": "./dist/index.mjs"
     },
     "./arithmetic": {
+      "types": "./dist/src/arithmetic.d.ts",
+      "import": "./dist/src/arithmetic.mjs",
       "require": "./dist/src/arithmetic.js",
-      "types": "./dist/src/arithmetic.d.ts"
+      "default": "./dist/src/arithmetic.mjs"
     },
     "./comparison": {
+      "types": "./dist/src/comparison.d.ts",
+      "import": "./dist/src/comparison.mjs",
       "require": "./dist/src/comparison.js",
-      "types": "./dist/src/comparison.d.ts"
+      "default": "./dist/src/comparison.mjs"
     },
     "./validation": {
+      "types": "./dist/src/validation.d.ts",
+      "import": "./dist/src/validation.mjs",
       "require": "./dist/src/validation.js",
-      "types": "./dist/src/validation.d.ts"
+      "default": "./dist/src/validation.mjs"
     },
     "./conversion": {
+      "types": "./dist/src/conversion.d.ts",
+      "import": "./dist/src/conversion.mjs",
       "require": "./dist/src/conversion.js",
-      "types": "./dist/src/conversion.d.ts"
+      "default": "./dist/src/conversion.mjs"
     },
     "./bitwise": {
+      "types": "./dist/src/bitwise.d.ts",
+      "import": "./dist/src/bitwise.mjs",
       "require": "./dist/src/bitwise.js",
-      "types": "./dist/src/bitwise.d.ts"
+      "default": "./dist/src/bitwise.mjs"
     },
     "./trigonometry": {
+      "types": "./dist/src/trigonometry.d.ts",
+      "import": "./dist/src/trigonometry.mjs",
       "require": "./dist/src/trigonometry.js",
-      "types": "./dist/src/trigonometry.d.ts"
+      "default": "./dist/src/trigonometry.mjs"
     },
     "./range": {
+      "types": "./dist/src/range.d.ts",
+      "import": "./dist/src/range.mjs",
       "require": "./dist/src/range.js",
-      "types": "./dist/src/range.d.ts"
+      "default": "./dist/src/range.mjs"
     },
     "./statistics": {
+      "types": "./dist/src/statistics.d.ts",
+      "import": "./dist/src/statistics.mjs",
       "require": "./dist/src/statistics.js",
-      "types": "./dist/src/statistics.d.ts"
+      "default": "./dist/src/statistics.mjs"
     },
     "./financial": {
+      "types": "./dist/src/financial.d.ts",
+      "import": "./dist/src/financial.mjs",
       "require": "./dist/src/financial.js",
-      "types": "./dist/src/financial.d.ts"
+      "default": "./dist/src/financial.mjs"
     },
     "./sequences": {
+      "types": "./dist/src/sequences.d.ts",
+      "import": "./dist/src/sequences.mjs",
       "require": "./dist/src/sequences.js",
-      "types": "./dist/src/sequences.d.ts"
+      "default": "./dist/src/sequences.mjs"
     },
     "./random": {
+      "types": "./dist/src/random.d.ts",
+      "import": "./dist/src/random.mjs",
       "require": "./dist/src/random.js",
-      "types": "./dist/src/random.d.ts"
+      "default": "./dist/src/random.mjs"
     },
     "./advanced": {
+      "types": "./dist/src/advanced.d.ts",
+      "import": "./dist/src/advanced.mjs",
       "require": "./dist/src/advanced.js",
-      "types": "./dist/src/advanced.d.ts"
+      "default": "./dist/src/advanced.mjs"
     },
     "./formatting": {
+      "types": "./dist/src/formatting.d.ts",
+      "import": "./dist/src/formatting.mjs",
       "require": "./dist/src/formatting.js",
-      "types": "./dist/src/formatting.d.ts"
+      "default": "./dist/src/formatting.mjs"
     },
     "./currency": {
+      "types": "./dist/src/currency.d.ts",
+      "import": "./dist/src/currency.mjs",
       "require": "./dist/src/currency.js",
-      "types": "./dist/src/currency.d.ts"
+      "default": "./dist/src/currency.mjs"
     },
     "./matrix": {
+      "types": "./dist/src/matrix.d.ts",
+      "import": "./dist/src/matrix.mjs",
       "require": "./dist/src/matrix.js",
-      "types": "./dist/src/matrix.d.ts"
+      "default": "./dist/src/matrix.mjs"
     },
     "./number-words": {
+      "types": "./dist/src/number-words.d.ts",
+      "import": "./dist/src/number-words.mjs",
       "require": "./dist/src/number-words.js",
-      "types": "./dist/src/number-words.d.ts"
+      "default": "./dist/src/number-words.mjs"
     },
     "./types": {
-      "types": "./dist/src/types.d.ts"
+      "types": "./dist/src/types.d.ts",
+      "import": "./dist/src/types.mjs",
+      "require": "./dist/src/types.js",
+      "default": "./dist/src/types.mjs"
     },
     "./ndarray": {
+      "types": "./dist/src/ndarray.d.ts",
+      "import": "./dist/src/ndarray.mjs",
       "require": "./dist/src/ndarray.js",
-      "types": "./dist/src/ndarray.d.ts"
+      "default": "./dist/src/ndarray.mjs"
     },
     "./linalg": {
+      "types": "./dist/src/linalg.d.ts",
+      "import": "./dist/src/linalg.mjs",
       "require": "./dist/src/linalg.js",
-      "types": "./dist/src/linalg.d.ts"
+      "default": "./dist/src/linalg.mjs"
     },
     "./polynomial": {
+      "types": "./dist/src/polynomial.d.ts",
+      "import": "./dist/src/polynomial.mjs",
       "require": "./dist/src/polynomial.js",
-      "types": "./dist/src/polynomial.d.ts"
+      "default": "./dist/src/polynomial.mjs"
     },
     "./calculus": {
+      "types": "./dist/src/calculus.d.ts",
+      "import": "./dist/src/calculus.mjs",
       "require": "./dist/src/calculus.js",
-      "types": "./dist/src/calculus.d.ts"
+      "default": "./dist/src/calculus.mjs"
     },
     "./fft": {
+      "types": "./dist/src/fft.d.ts",
+      "import": "./dist/src/fft.mjs",
       "require": "./dist/src/fft.js",
-      "types": "./dist/src/fft.d.ts"
+      "default": "./dist/src/fft.mjs"
     },
     "./interpolation": {
+      "types": "./dist/src/interpolation.d.ts",
+      "import": "./dist/src/interpolation.mjs",
       "require": "./dist/src/interpolation.js",
-      "types": "./dist/src/interpolation.d.ts"
+      "default": "./dist/src/interpolation.mjs"
     },
     "./signal": {
+      "types": "./dist/src/signal.d.ts",
+      "import": "./dist/src/signal.mjs",
       "require": "./dist/src/signal.js",
-      "types": "./dist/src/signal.d.ts"
+      "default": "./dist/src/signal.mjs"
     },
     "./precision": {
+      "types": "./dist/src/precision.d.ts",
+      "import": "./dist/src/precision.mjs",
       "require": "./dist/src/precision.js",
-      "types": "./dist/src/precision.d.ts"
+      "default": "./dist/src/precision.mjs"
+    },
+    "./package.json": {
+      "default": "./package.json"
     }
   },
   "scripts": {
     "clean": "npx rimraf dist",
     "prebuild": "npm run clean",
     "build": "tsc",
+    "postbuild": "node scripts/generate-esm-wrappers.cjs",
     "build:watch": "tsc --watch",
-    "test": "jest --verbose",
-    "test:coverage": "jest --coverage"
+    "typecheck": "tsc --noEmit",
+    "lint": "node scripts/lint.cjs",
+    "format": "node scripts/format-check.cjs",
+    "test": "jest --runInBand",
+    "coverage": "jest --coverage --runInBand",
+    "test:coverage": "npm run coverage",
+    "bench": "npm run build && node --expose-gc benchmark/native-vs-numwiz.js",
+    "benchmark": "npm run bench",
+    "package:validate": "node scripts/validate-package.cjs",
+    "ci": "npm run lint && npm run typecheck && npm test && npm run coverage && npm run build && npm run package:validate"
   },
   "keywords": [
     "number",
@@ -149,8 +219,19 @@
   "publishConfig": {
     "access": "public"
   },
+  "engines": {
+    "node": ">=18"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/isubroto/numwiz.git"
+  },
+  "bugs": {
+    "url": "https://github.com/isubroto/numwiz/issues"
+  },
+  "homepage": "https://github.com/isubroto/numwiz#readme",
   "author": "Subroto Saha",
-  "license": "MIT",
+  "license": "SEE LICENSE IN LICENSE",
   "devDependencies": {
     "@types/jest": "^29.0.0",
     "@types/node": "^20.0.0",

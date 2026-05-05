@@ -20,6 +20,7 @@ const Signal = {
     b: number[],
     mode: "full" | "same" | "valid" = "full"
   ): number[] {
+    if (a.length === 0 || b.length === 0) return [];
     const la = a.length,
       lb = b.length;
     const fullLen = la + lb - 1;

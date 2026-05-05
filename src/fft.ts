@@ -84,6 +84,7 @@ const FFT = {
    * @returns Array of ComplexNumber frequency bins
    */
   fft(signal: number[] | ComplexNumber[], n?: number): ComplexNumber[] {
+    if (signal.length === 0 && (n === undefined || n === 0)) return [];
     const raw: ComplexNumber[] = signal.map((s) =>
       typeof s === "number" ? cx(s) : s
     );
@@ -100,6 +101,7 @@ const FFT = {
    */
   ifft(spectrum: ComplexNumber[], normalize = true): ComplexNumber[] {
     const n = spectrum.length;
+    if (n === 0) return [];
     const result = FFT._iterativeFFT(spectrum, true);
     if (normalize)
       return result.map((c) => ({ real: c.real / n, imag: c.imag / n }));
@@ -111,6 +113,7 @@ const FFT = {
    * Returns the first N/2 + 1 complex bins (non-redundant half).
    */
   rfft(signal: number[], n?: number): ComplexNumber[] {
+    if (signal.length === 0 && (n === undefined || n === 0)) return [];
     const size = n ?? nextPow2(signal.length);
     const complex: ComplexNumber[] = signal.slice(0, size).map((v) => cx(v));
     while (complex.length < size) complex.push(cx(0));

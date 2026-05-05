@@ -1,6 +1,8 @@
 /**
  * Arithmetic Operations
  */
+import { numwizError } from "./errors";
+
 class Arithmetic {
   static add(...nums: number[]): number {
     Arithmetic._validateNums(nums);
@@ -22,21 +24,48 @@ class Arithmetic {
   static divide(a: number, b: number): number {
     Arithmetic._validateNum(a);
     Arithmetic._validateNum(b);
-    if (b === 0) throw new Error("Division by zero");
+    if (b === 0) {
+      throw numwizError(
+        Error,
+        "Arithmetic",
+        "divide",
+        "division by zero",
+        "a finite, non-zero denominator",
+        b
+      );
+    }
     return a / b;
   }
 
   static modulus(a: number, b: number): number {
     Arithmetic._validateNum(a);
     Arithmetic._validateNum(b);
-    if (b === 0) throw new Error("Division by zero");
+    if (b === 0) {
+      throw numwizError(
+        Error,
+        "Arithmetic",
+        "modulus",
+        "modulus by zero",
+        "a finite, non-zero divisor",
+        b
+      );
+    }
     return a % b;
   }
 
   static floorDivide(a: number, b: number): number {
     Arithmetic._validateNum(a);
     Arithmetic._validateNum(b);
-    if (b === 0) throw new Error("Division by zero");
+    if (b === 0) {
+      throw numwizError(
+        Error,
+        "Arithmetic",
+        "floorDivide",
+        "division by zero",
+        "a finite, non-zero denominator",
+        b
+      );
+    }
     return Math.floor(a / b);
   }
 
@@ -49,7 +78,14 @@ class Arithmetic {
   static sqrt(n: number): number {
     Arithmetic._validateNum(n);
     if (n < 0)
-      throw new RangeError("Cannot take square root of negative number");
+      throw numwizError(
+        RangeError,
+        "Arithmetic",
+        "sqrt",
+        "cannot take square root of a negative number",
+        "a non-negative number",
+        n
+      );
     return Math.sqrt(n);
   }
 
@@ -61,7 +97,16 @@ class Arithmetic {
   static nthRoot(n: number, root: number): number {
     Arithmetic._validateNum(n);
     Arithmetic._validateNum(root);
-    if (root === 0) throw new Error("Zeroth root is undefined");
+    if (root === 0) {
+      throw numwizError(
+        Error,
+        "Arithmetic",
+        "nthRoot",
+        "zeroth root is undefined",
+        "a non-zero root",
+        root
+      );
+    }
     return Math.pow(n, 1 / root);
   }
 
@@ -77,25 +122,61 @@ class Arithmetic {
 
   static reciprocal(n: number): number {
     Arithmetic._validateNum(n);
-    if (n === 0) throw new Error("Reciprocal of zero is undefined");
+    if (n === 0) {
+      throw numwizError(
+        Error,
+        "Arithmetic",
+        "reciprocal",
+        "reciprocal of zero is undefined",
+        "a finite, non-zero number",
+        n
+      );
+    }
     return 1 / n;
   }
 
   static log(n: number): number {
     Arithmetic._validateNum(n);
-    if (n <= 0) throw new RangeError("log requires positive number");
+    if (n <= 0) {
+      throw numwizError(
+        RangeError,
+        "Arithmetic",
+        "log",
+        "logarithm domain error",
+        "a positive number",
+        n
+      );
+    }
     return Math.log(n);
   }
 
   static log2(n: number): number {
     Arithmetic._validateNum(n);
-    if (n <= 0) throw new RangeError("log2 requires positive number");
+    if (n <= 0) {
+      throw numwizError(
+        RangeError,
+        "Arithmetic",
+        "log2",
+        "logarithm domain error",
+        "a positive number",
+        n
+      );
+    }
     return Math.log2(n);
   }
 
   static log10(n: number): number {
     Arithmetic._validateNum(n);
-    if (n <= 0) throw new RangeError("log10 requires positive number");
+    if (n <= 0) {
+      throw numwizError(
+        RangeError,
+        "Arithmetic",
+        "log10",
+        "logarithm domain error",
+        "a positive number",
+        n
+      );
+    }
     return Math.log10(n);
   }
 
@@ -110,7 +191,14 @@ class Arithmetic {
 
   private static _validateNum(n: unknown): void {
     if (typeof n !== "number" || Number.isNaN(n)) {
-      throw new TypeError(`Expected a number, got ${typeof n}: ${n}`);
+      throw numwizError(
+        TypeError,
+        "Arithmetic",
+        "validateNumber",
+        "invalid numeric argument",
+        "a JavaScript number that is not NaN",
+        n
+      );
     }
   }
 
@@ -118,8 +206,13 @@ class Arithmetic {
     if (nums.length === 0) return;
     nums.forEach((n, i) => {
       if (typeof n !== "number" || Number.isNaN(n as number)) {
-        throw new TypeError(
-          `Argument at index ${i} is not a valid number: ${n}`
+        throw numwizError(
+          TypeError,
+          "Arithmetic",
+          "validateNumbers",
+          `invalid numeric argument at index ${i}`,
+          "a JavaScript number that is not NaN",
+          n
         );
       }
     });

@@ -11,6 +11,7 @@
  */
 
 import type { LUResult, QRResult, EigenvalueResult, Matrix2D } from "./types";
+import { numwizError } from "./errors";
 
 class Matrix {
   // ═══════════════════════════════════════
@@ -38,7 +39,14 @@ class Matrix {
 
   private static _validate(data: unknown): Matrix2D {
     if (!Array.isArray(data) || data.length === 0) {
-      throw new TypeError("Matrix requires a non-empty 2D array");
+      throw numwizError(
+        TypeError,
+        "Matrix",
+        "validate",
+        "invalid matrix input",
+        "a non-empty 2D numeric array or a numeric vector",
+        data
+      );
     }
     if (!Array.isArray(data[0])) {
       data = [data];
@@ -46,21 +54,45 @@ class Matrix {
     const d = data as number[][];
     const cols = d[0].length;
     if (cols === 0) {
-      throw new TypeError("Matrix rows cannot be empty");
+      throw numwizError(
+        TypeError,
+        "Matrix",
+        "validate",
+        "empty matrix row",
+        "each row to contain at least one number",
+        d[0]
+      );
     }
     for (let i = 0; i < d.length; i++) {
       if (!Array.isArray(d[i])) {
-        throw new TypeError(`Row ${i} is not an array`);
+        throw numwizError(
+          TypeError,
+          "Matrix",
+          "validate",
+          `row ${i} is not an array`,
+          "a rectangular 2D numeric array",
+          d[i]
+        );
       }
       if (d[i].length !== cols) {
-        throw new TypeError(
-          `Row ${i} has ${d[i].length} columns, expected ${cols}`
+        throw numwizError(
+          TypeError,
+          "Matrix",
+          "validate",
+          `row ${i} has ${d[i].length} columns`,
+          `${cols} columns`,
+          d[i]
         );
       }
       for (let j = 0; j < cols; j++) {
-        if (typeof d[i][j] !== "number" || Number.isNaN(d[i][j])) {
-          throw new TypeError(
-            `Element at [${i}][${j}] is not a valid number: ${d[i][j]}`
+        if (typeof d[i][j] !== "number" || !Number.isFinite(d[i][j])) {
+          throw numwizError(
+            TypeError,
+            "Matrix",
+            "validate",
+            `invalid element at [${i}][${j}]`,
+            "a finite JavaScript number",
+            d[i][j]
           );
         }
       }
@@ -75,8 +107,13 @@ class Matrix {
 
   private static _assertSquare(m: Matrix2D, method: string): void {
     if (m.length !== m[0].length) {
-      throw new RangeError(
-        `${method} requires a square matrix, got ${m.length}×${m[0].length}`
+      throw numwizError(
+        RangeError,
+        "Matrix",
+        method,
+        "matrix must be square",
+        "rows === columns",
+        { rows: m.length, cols: m[0].length }
       );
     }
   }
@@ -87,8 +124,16 @@ class Matrix {
     method: string
   ): void {
     if (a.length !== b.length || a[0].length !== b[0].length) {
-      throw new RangeError(
-        `${method}: size mismatch ${a.length}×${a[0].length} vs ${b.length}×${b[0].length}`
+      throw numwizError(
+        RangeError,
+        "Matrix",
+        method,
+        "matrix size mismatch",
+        "matrices with the same row and column counts",
+        {
+          left: [a.length, a[0].length],
+          right: [b.length, b[0].length],
+        }
       );
     }
   }
@@ -100,14 +145,26 @@ class Matrix {
       rows <= 0 ||
       cols <= 0
     ) {
-      throw new RangeError(`Invalid matrix dimensions: ${rows}×${cols}`);
+      throw numwizError(
+        RangeError,
+        "Matrix",
+        "dimensions",
+        "invalid matrix dimensions",
+        "positive integer row and column counts",
+        { rows, cols }
+      );
     }
   }
 
   private static _assertIndex(m: Matrix2D, row: number, col: number): void {
     if (row < 0 || row >= m.length || col < 0 || col >= m[0].length) {
-      throw new RangeError(
-        `Index [${row}][${col}] out of range for ${m.length}×${m[0].length} matrix`
+      throw numwizError(
+        RangeError,
+        "Matrix",
+        "index",
+        "matrix index out of range",
+        `row in [0, ${m.length - 1}] and col in [0, ${m[0].length - 1}]`,
+        { row, col }
       );
     }
   }

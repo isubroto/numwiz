@@ -2,6 +2,8 @@
 // NDArray — NumPy-inspired N-dimensional array for NumWiz
 // =====================================================================
 
+import { numwizError } from "./errors";
+
 export type Shape = ReadonlyArray<number>;
 export type MutableShape = number[];
 
@@ -19,6 +21,31 @@ function computeSize(shape: Shape): number {
   return shape.length === 0
     ? 1
     : (shape as number[]).reduce((a, b) => a * b, 1);
+}
+
+function validateShape(shape: number[], method: string): void {
+  if (!Array.isArray(shape)) {
+    throw numwizError(
+      TypeError,
+      "NDArray",
+      method,
+      "invalid shape",
+      "an array of non-negative integer dimensions",
+      shape
+    );
+  }
+  shape.forEach((dimension, axis) => {
+    if (!Number.isInteger(dimension) || dimension < 0) {
+      throw numwizError(
+        RangeError,
+        "NDArray",
+        method,
+        `invalid dimension at axis ${axis}`,
+        "a non-negative integer",
+        dimension
+      );
+    }
+  });
 }
 
 function computeCStrides(shape: Shape): number[] {
@@ -95,10 +122,33 @@ export class NDArray {
     strides?: number[],
     offset = 0
   ) {
+    validateShape(shape, "constructor");
     this._data = data instanceof Float64Array ? data : new Float64Array(data);
     this._shape = shape.slice();
     this._strides = strides ? strides.slice() : computeCStrides(shape);
     this._offset = offset;
+
+    const size = computeSize(shape);
+    if (!strides && this._data.length !== size) {
+      throw numwizError(
+        RangeError,
+        "NDArray",
+        "constructor",
+        "data length does not match shape",
+        `${size} value${size === 1 ? "" : "s"} for shape [${shape.join(",")}]`,
+        { dataLength: this._data.length, shape }
+      );
+    }
+    if (strides && strides.length !== shape.length) {
+      throw numwizError(
+        RangeError,
+        "NDArray",
+        "constructor",
+        "strides length does not match shape rank",
+        `${shape.length} stride value${shape.length === 1 ? "" : "s"}`,
+        strides
+      );
+    }
   }
 
   // ----------------------
@@ -158,6 +208,16 @@ export class NDArray {
   }
 
   set(value: number, ...indices: number[]): this {
+    if (typeof value !== "number") {
+      throw numwizError(
+        TypeError,
+        "NDArray",
+        "set",
+        "invalid element value",
+        "a JavaScript number",
+        value
+      );
+    }
     this._data[this._flatIndex(indices)] = value;
     return this;
   }
@@ -360,6 +420,30 @@ export class NDArray {
     return new NDArray(out, outShape);
   }
 
+  private _applyScalarInPlace(
+    scalar: number,
+    method: string,
+    fn: (a: number, b: number) => number
+  ): this {
+    if (typeof scalar !== "number" || !Number.isFinite(scalar)) {
+      throw numwizError(
+        TypeError,
+        "NDArray",
+        method,
+        "invalid scalar",
+        "a finite JavaScript number",
+        scalar
+      );
+    }
+
+    for (let i = 0; i < this.size; i++) {
+      const idx = flatToMulti(i, this._shape);
+      this.set(fn(this.get(...idx), scalar), ...idx);
+    }
+
+    return this;
+  }
+
   // ----------------------
   // Arithmetic
   // ----------------------
@@ -368,19 +452,60 @@ export class NDArray {
     return this._applyBinaryOp(other, (a, b) => a + b);
   }
 
+  addInPlace(scalar: number): this {
+    return this._applyScalarInPlace(scalar, "addInPlace", (a, b) => a + b);
+  }
+
   subtract(other: NDArray | number): NDArray {
     return this._applyBinaryOp(other, (a, b) => a - b);
+  }
+
+  subtractInPlace(scalar: number): this {
+    return this._applyScalarInPlace(scalar, "subtractInPlace", (a, b) => a - b);
   }
 
   multiply(other: NDArray | number): NDArray {
     return this._applyBinaryOp(other, (a, b) => a * b);
   }
 
+  multiplyInPlace(scalar: number): this {
+    return this._applyScalarInPlace(scalar, "multiplyInPlace", (a, b) => a * b);
+  }
+
   divide(other: NDArray | number): NDArray {
     return this._applyBinaryOp(other, (a, b) => {
-      if (b === 0) throw new Error(`Division by zero`);
+      if (b === 0) {
+        throw numwizError(
+          Error,
+          "NDArray",
+          "divide",
+          "division by zero",
+          "a non-zero divisor",
+          b
+        );
+      }
       return a / b;
     });
+  }
+
+  divideInPlace(scalar: number): this {
+    return this._applyScalarInPlace(scalar, "divideInPlace", (a, b) => {
+      if (b === 0) {
+        throw numwizError(
+          Error,
+          "NDArray",
+          "divideInPlace",
+          "division by zero",
+          "a finite, non-zero scalar",
+          b
+        );
+      }
+      return a / b;
+    });
+  }
+
+  fillInPlace(value: number): this {
+    return this._applyScalarInPlace(value, "fillInPlace", (_a, b) => b);
   }
 
   safeDivide(other: NDArray | number): NDArray {
