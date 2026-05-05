@@ -189,6 +189,7 @@
     "bench": "npm run build && node --expose-gc benchmark/native-vs-numwiz.js",
     "benchmark": "npm run bench",
     "package:validate": "node scripts/validate-package.cjs",
+    "release:validate": "npm run build && npm test && npm run package:validate && npm run bench",
     "ci": "npm run lint && npm run typecheck && npm test && npm run coverage && npm run build && npm run package:validate"
   },
   "keywords": [
