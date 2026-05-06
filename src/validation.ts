@@ -60,7 +60,7 @@ class Validation {
     return c * c * c === n;
   }
   static isPowerOfTwo(n: number): boolean {
-    return n > 0 && (n & (n - 1)) === 0;
+    return n > 0 && Number.isSafeInteger(n) && Math.log2(n) % 1 === 0;
   }
   static isPowerOfN(num: number, n: number): boolean {
     if (num <= 0) return false;

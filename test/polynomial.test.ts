@@ -95,6 +95,14 @@ describe("Polynomial — Arithmetic", () => {
     close(quotient.evaluate(0), -2); // x-2 @ 0
     close(remainder.evaluate(0), 0, 1e-9);
   });
+
+  test("lower degree divided by higher degree returns zero quotient", () => {
+    const dividend = new Polynomial([1, 2]);
+    const divisor = new Polynomial([1, 0, 0]);
+    const { quotient, remainder } = dividend.divide(divisor);
+    expect(quotient.coeffs).toEqual([0]);
+    expect(remainder.coeffs).toEqual([1, 2]);
+  });
 });
 
 // ═══════════════════════════════════════════════════════════════════

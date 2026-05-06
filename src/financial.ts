@@ -22,6 +22,7 @@ class Financial {
   }
 
   static emi(principal: number, annualRate: number, months: number): number {
+    if (annualRate === 0) return principal / months;
     const r = annualRate / 12 / 100;
     return (
       (principal * r * Math.pow(1 + r, months)) / (Math.pow(1 + r, months) - 1)
@@ -81,6 +82,7 @@ class Financial {
   ): number {
     const r = annualRate / 12 / 100;
     const n = years * 12;
+    if (annualRate === 0) return monthlyInvestment * n;
     return monthlyInvestment * ((Math.pow(1 + r, n) - 1) / r) * (1 + r);
   }
 

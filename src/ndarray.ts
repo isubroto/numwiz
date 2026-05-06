@@ -224,7 +224,16 @@ export class NDArray {
 
   /** Flat 0-based index access (C-order). Negative indices wrap around. */
   item(i: number): number {
+    const original = i;
+    if (!Number.isInteger(i)) {
+      throw new RangeError(`Index ${original} must be an integer`);
+    }
     if (i < 0) i += this.size;
+    if (i < 0 || i >= this.size) {
+      throw new RangeError(
+        `Index ${original} out of bounds for array of size ${this.size}`
+      );
+    }
     return this.get(...flatToMulti(i, this._shape));
   }
 
@@ -1013,9 +1022,19 @@ export class NDArray {
     if (arrays.length === 0) throw new RangeError(`No arrays to concatenate`);
     const ndim = arrays[0].ndim;
     if (axis < 0) axis += ndim;
+    if (axis < 0 || axis >= ndim) {
+      throw new RangeError(`Axis ${axis} out of bounds for ${ndim}D array`);
+    }
     for (const a of arrays) {
       if (a.ndim !== ndim)
         throw new RangeError(`All arrays must have same ndim`);
+      for (let dim = 0; dim < ndim; dim++) {
+        if (dim !== axis && a._shape[dim] !== arrays[0]._shape[dim]) {
+          throw new RangeError(
+            `All arrays must have same shape except along axis ${axis}`
+          );
+        }
+      }
     }
 
     const newShape = arrays[0]._shape.slice();

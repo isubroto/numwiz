@@ -150,6 +150,7 @@ class Formatting {
   }
 
   static toEngineering(num: number): string {
+    if (num === 0) return "0×10^0";
     const exp = Math.floor(Math.log10(Math.abs(num)));
     const engExp = Math.floor(exp / 3) * 3;
     const mantissa = num / Math.pow(10, engExp);

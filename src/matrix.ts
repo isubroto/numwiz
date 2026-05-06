@@ -835,10 +835,11 @@ class Matrix {
     ];
   }
 
-  static eigenvalues(m: Matrix2D | Matrix): number[] {
+  static eigenvalues(m: Matrix2D | Matrix): EigenvalueResult[] {
     let data = Matrix._ensure(m);
     Matrix._assertSquare(data, "eigenvalues");
     const n = data.length;
+    if (n === 2) return Matrix.eigenvalues2x2(data);
     const maxIter = 1000;
     let A = data.map((r) => [...r]);
 
@@ -1476,7 +1477,7 @@ class Matrix {
   norm(): number {
     return Matrix.norm(this._data);
   }
-  eigenvalues(): number[] {
+  eigenvalues(): EigenvalueResult[] {
     return Matrix.eigenvalues(this._data);
   }
   flatten(): number[] {

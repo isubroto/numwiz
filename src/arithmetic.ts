@@ -107,6 +107,9 @@ class Arithmetic {
         root
       );
     }
+    if (n < 0 && Number.isInteger(root) && Math.abs(root % 2) === 1) {
+      return -Math.pow(-n, 1 / root);
+    }
     return Math.pow(n, 1 / root);
   }
 
