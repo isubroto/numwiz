@@ -1,3 +1,10 @@
+# [1.3.0](https://github.com/isubroto/numwiz/compare/v1.2.0...v1.3.0) (2026-05-06)
+
+
+### Features
+
+* add input validation and edge case handling ([12ad8b8](https://github.com/isubroto/numwiz/commit/12ad8b86bae844435e9169381ce6e65431377d17))
+
 # [1.2.0](https://github.com/isubroto/numwiz/compare/v1.1.2...v1.2.0) (2026-05-05)
 
 
