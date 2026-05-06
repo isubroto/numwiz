@@ -4,13 +4,17 @@ import {
   Calculus,
   Currency,
   FFT,
+  Financial,
+  Formatting,
   Interpolation,
   LinAlg,
   Matrix,
   NDArray,
   Polynomial,
+  Range,
   Signal,
   Statistics,
+  Validation,
 } from "../index";
 
 describe("edge cases and diagnostic errors", () => {
@@ -49,6 +53,16 @@ describe("edge cases and diagnostic errors", () => {
     expect(() => Currency.format(Infinity, "USD")).toThrow(
       /\[NumWiz\.Currency\.format\]/
     );
+    expect(() => Formatting.toWords(Infinity)).toThrow(RangeError);
+  });
+
+  test("reviewed scalar edge cases stay finite and bounded", () => {
+    expect(() => Range.create(1, 3, 0)).toThrow(RangeError);
+    expect(Arithmetic.nthRoot(-8, 3)).toBe(-2);
+    expect(Validation.isPowerOfTwo(4294967297)).toBe(false);
+    expect(Formatting.toEngineering(0)).toBe("0×10^0");
+    expect(Financial.emi(1200, 0, 12)).toBe(100);
+    expect(Financial.sipFutureValue(100, 0, 2)).toBe(2400);
   });
 
   test("zero division is explicit across number, array, and precision APIs", () => {

@@ -1,5 +1,12 @@
 import { Matrix } from "../index";
 
+function realEigenvalues(m: number[][]): number[] {
+  return Matrix.eigenvalues(m).map((v) => {
+    if (typeof v !== "number") throw new Error("Expected real eigenvalue");
+    return v;
+  });
+}
+
 // ═══════════════════════════════════════
 // CREATION — all return plain [][]
 // ═══════════════════════════════════════
@@ -721,7 +728,7 @@ describe("Decomposition", () => {
   });
 
   test("eigenvalues 2×2", () => {
-    const eigs = Matrix.eigenvalues([
+    const eigs = realEigenvalues([
       [2, 1],
       [1, 2],
     ]).sort((a, b) => b - a);
@@ -730,12 +737,23 @@ describe("Decomposition", () => {
   });
 
   test("eigenvalues diagonal", () => {
-    const eigs = Matrix.eigenvalues(Matrix.diagonal([5, 3, 1])).sort(
+    const eigs = realEigenvalues(Matrix.diagonal([5, 3, 1])).sort(
       (a, b) => b - a
     );
     expect(eigs[0]).toBeCloseTo(5);
     expect(eigs[1]).toBeCloseTo(3);
     expect(eigs[2]).toBeCloseTo(1);
+  });
+
+  test("eigenvalues 2×2 rotation returns complex pair", () => {
+    const eigs = Matrix.eigenvalues([
+      [0, -1],
+      [1, 0],
+    ]);
+    expect(eigs).toEqual([
+      { real: 0, imag: 1 },
+      { real: 0, imag: -1 },
+    ]);
   });
 });
 

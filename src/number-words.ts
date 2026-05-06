@@ -30,6 +30,9 @@ class NumberWords {
     locale = "en",
     system: string | null = null
   ): string {
+    if (!Number.isFinite(num)) {
+      throw new RangeError("num must be a finite number");
+    }
     const loc = locales[locale];
     if (!loc)
       throw new Error(

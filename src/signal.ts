@@ -145,6 +145,7 @@ const Signal = {
    * Rectangular (boxcar) window.
    */
   windowRectangular(n: number): number[] {
+    _validateWindowLength(n);
     return new Array(n).fill(1);
   },
 
@@ -152,6 +153,8 @@ const Signal = {
    * Hann (Hanning) window: w[k] = 0.5 * (1 - cos(2πk / (n-1)))
    */
   windowHann(n: number): number[] {
+    _validateWindowLength(n);
+    if (n === 1) return [1];
     return Array.from(
       { length: n },
       (_, k) => 0.5 * (1 - Math.cos((2 * Math.PI * k) / (n - 1)))
@@ -162,6 +165,8 @@ const Signal = {
    * Hamming window: w[k] = 0.54 - 0.46 * cos(2πk / (n-1))
    */
   windowHamming(n: number): number[] {
+    _validateWindowLength(n);
+    if (n === 1) return [1];
     return Array.from(
       { length: n },
       (_, k) => 0.54 - 0.46 * Math.cos((2 * Math.PI * k) / (n - 1))
@@ -172,6 +177,8 @@ const Signal = {
    * Blackman window.
    */
   windowBlackman(n: number): number[] {
+    _validateWindowLength(n);
+    if (n === 1) return [1];
     return Array.from({ length: n }, (_, k) => {
       const t = (2 * Math.PI * k) / (n - 1);
       return 0.42 - 0.5 * Math.cos(t) + 0.08 * Math.cos(2 * t);
@@ -182,6 +189,8 @@ const Signal = {
    * Bartlett (triangular) window.
    */
   windowBartlett(n: number): number[] {
+    _validateWindowLength(n);
+    if (n === 1) return [1];
     return Array.from(
       { length: n },
       (_, k) => 1 - Math.abs((2 * k) / (n - 1) - 1)
@@ -192,6 +201,8 @@ const Signal = {
    * Flat-top window (for amplitude-accurate measurements).
    */
   windowFlattop(n: number): number[] {
+    _validateWindowLength(n);
+    if (n === 1) return [1];
     const a = [0.21557895, 0.41663158, 0.277263158, 0.083578947, 0.006947368];
     return Array.from({ length: n }, (_, k) => {
       const t = (2 * Math.PI * k) / (n - 1);
@@ -210,6 +221,8 @@ const Signal = {
    * @param beta Shape parameter (0 = rectangular, 5 ≈ Hamming, 8.6 ≈ Blackman)
    */
   windowKaiser(n: number, beta = 5): number[] {
+    _validateWindowLength(n);
+    if (n === 1) return [1];
     const i0Beta = _besselI0(beta);
     return Array.from({ length: n }, (_, k) => {
       const t = (2 * k) / (n - 1) - 1;
@@ -222,6 +235,8 @@ const Signal = {
    * @param sigma Standard deviation in samples (default: n/6)
    */
   windowGaussian(n: number, sigma?: number): number[] {
+    _validateWindowLength(n);
+    if (n === 1) return [1];
     const s = sigma ?? n / 6;
     const center = (n - 1) / 2;
     return Array.from({ length: n }, (_, k) =>
@@ -296,6 +311,8 @@ const Signal = {
   resample(signal: number[], newLen: number): number[] {
     const n = signal.length;
     if (newLen <= 0) return [];
+    if (n === 0) return [];
+    if (newLen === 1) return [signal[0]];
     if (newLen === n) return signal.slice();
     return Array.from({ length: newLen }, (_, i) => {
       const pos = (i / (newLen - 1)) * (n - 1);
@@ -369,6 +386,12 @@ const Signal = {
     return count / (signal.length - 1);
   },
 };
+
+function _validateWindowLength(n: number): void {
+  if (!Number.isInteger(n) || n < 1) {
+    throw new RangeError("Window length must be a positive integer");
+  }
+}
 
 // ---- Modified Bessel function of the first kind I₀(x) ----
 // Used for Kaiser window

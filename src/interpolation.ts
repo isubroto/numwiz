@@ -141,6 +141,9 @@ function _naturalCubicSpline(
 ): [number[], number[], number[], number[]] {
   const n = xp.length;
   const h = Array.from({ length: n - 1 }, (_, i) => xp[i + 1] - xp[i]);
+  if (n === 2) {
+    return [[yp[0]], [(yp[1] - yp[0]) / h[0]], [0], [0]];
+  }
   // Right-hand side
   const rhs = Array.from(
     { length: n - 2 },

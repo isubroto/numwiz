@@ -196,6 +196,12 @@ describe("NDArray — Indexing & Slicing", () => {
     const a = NDArray.from([10, 20, 30]);
     expect(a.item(1)).toBe(20);
   });
+
+  test("item(i) rejects flat index outside size", () => {
+    const a = NDArray.from([10, 20]);
+    expect(() => a.item(4)).toThrow(RangeError);
+    expect(() => a.item(-3)).toThrow(RangeError);
+  });
 });
 
 // ═══════════════════════════════════════════════════════════════════
@@ -491,6 +497,15 @@ describe("NDArray — Concatenation", () => {
     const b = NDArray.from([[5, 6]]);
     const c = NDArray.concatenate([a, b], 0);
     expect(c.shape).toEqual([3, 2]);
+  });
+
+  test("concatenate validates non-concat axes", () => {
+    const a = NDArray.from([
+      [1, 2],
+      [3, 4],
+    ]);
+    const b = NDArray.from([[5, 6, 7]]);
+    expect(() => NDArray.concatenate([a, b], 0)).toThrow(RangeError);
   });
 
   test("hstack", () => {

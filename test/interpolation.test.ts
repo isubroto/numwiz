@@ -128,6 +128,17 @@ describe("CubicSpline — construction & evaluation", () => {
   });
 });
 
+describe("CubicSpline — two point data", () => {
+  const cs = new CubicSpline([0, 2], [10, 20]);
+
+  test("falls back to exact linear spline", () => {
+    close(cs.evaluate(1), 15, 1e-12);
+    close(cs.derivative(1), 5, 1e-12);
+    close(cs.secondDerivative(1), 0, 1e-12);
+    close(cs.integral(0, 2), 30, 1e-12);
+  });
+});
+
 describe("CubicSpline — linear data exact", () => {
   // Linear y=x: spline should be EXACTLY linear
   const xp = [0, 1, 2, 3, 4];

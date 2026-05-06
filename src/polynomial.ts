@@ -87,6 +87,12 @@ export class Polynomial {
         remainder: Polynomial.zero(),
       };
     }
+    if (this.degree < divisor.degree) {
+      return {
+        quotient: Polynomial.zero(),
+        remainder: new Polynomial(this.coeffs),
+      };
+    }
 
     const result: number[] = [...this.coeffs];
     const div = divisor.coeffs;

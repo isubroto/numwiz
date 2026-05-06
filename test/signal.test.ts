@@ -153,6 +153,24 @@ describe("Signal — window functions", () => {
     close(w[n - 1], 0, 1e-7); // periodic definition may differ
   });
 
+  test("single-sample windows are finite", () => {
+    const windows = [
+      Signal.windowRectangular,
+      Signal.windowHann,
+      Signal.windowHamming,
+      Signal.windowBlackman,
+      Signal.windowBartlett,
+      Signal.windowFlattop,
+      Signal.windowKaiser,
+      Signal.windowGaussian,
+    ];
+    windows.forEach((windowFn) => arrClose(windowFn(1), [1]));
+  });
+
+  test("window length must be positive", () => {
+    expect(() => Signal.windowHann(0)).toThrow(RangeError);
+  });
+
   test("Hann window values in [0,1]", () => {
     Signal.windowHann(16).forEach((v) => {
       expect(v).toBeGreaterThanOrEqual(-1e-10);
@@ -235,6 +253,10 @@ describe("Signal — resample / zeroPad", () => {
   test("resample to same length = same signal", () => {
     const x = [1, 2, 3, 4];
     arrClose(Signal.resample(x, 4), x, 1e-6);
+  });
+
+  test("resample to one sample returns first sample", () => {
+    arrClose(Signal.resample([3, 6, 9], 1), [3]);
   });
 
   test("zeroPad([1,2,3], 5) = [1,2,3,0,0]", () => {
